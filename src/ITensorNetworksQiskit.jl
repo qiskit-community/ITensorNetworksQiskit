@@ -4,9 +4,8 @@ using ITensorNetworks: ITensorNetwork, update
 
 include("utils.jl")
 
-function circuitMPS(gates)
+function circuitMPS(L, gates)
 
-    L = 4
     #Build the graph that reflects our tensor network
     g = named_grid((L, 1))
     s = siteinds("S=1/2", g)
@@ -31,8 +30,6 @@ function circuitMPS(gates)
     #     ("T", [(4, 1)]),
     # ]
 
-    no_layers = 3
-
     expect_sigmaz = real.(expect(ψ, "Z", [(1, 1), (3, 1)]))
     println("Initial Sigma Z on selected sites is $expect_sigmaz")
 
@@ -43,15 +40,11 @@ function circuitMPS(gates)
     println("Initial RDM on selected sites is $ρ")
 
     #Run the circuit
-    for i = 1:no_layers
-        println("Running circuit layer $i")
-        for gate in gates
-            o = gate_to_itensor(gate, s)
-            ψ, bpc = apply(o, ψ, bpc; apply_kwargs...)
-            #Update the BP cache after each gate here.
-            bpc = update(bpc; bp_update_kwargs...)
-        end
-
+    for gate in gates
+        o = gate_to_itensor(gate, s)
+        ψ, bpc = apply(o, ψ, bpc; apply_kwargs...)
+        #Update the BP cache after each gate here.
+        bpc = update(bpc; bp_update_kwargs...)
     end
 
     expect_sigmaz = real.(expect(ψ, "Z", [(1, 1), (3, 1)]))
