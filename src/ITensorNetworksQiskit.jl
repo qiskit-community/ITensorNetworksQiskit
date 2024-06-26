@@ -1,62 +1,65 @@
-module ITensorNetworksQiskit
-
 using NamedGraphs.NamedGraphGenerators: named_grid
-using ITensors: Trotter, siteinds, expect
-using ITensorNetworks: ITensorNetwork, update, maxlinkdim
-using ITensorNetworks.ModelHamiltonians: ising
+using ITensors: siteinds, expect
+using ITensorNetworks: ITensorNetwork, update
 
 include("utils.jl")
 
-function main()
+function circuitMPS(gates)
 
-    nx, ny = 2, 2
-    #Build a qubit layout of 2x2 heavy hexagons
-    g = heavy_hex_lattice_graph(nx, ny)
-    nqubits = length(vertices(g))
+    L = 4
+    #Build the graph that reflects our tensor network
+    g = named_grid((L, 1))
     s = siteinds("S=1/2", g)
+    #Initialise the tensor network, all qubits down (in Z basis)
     ψ = ITensorNetwork(v -> "↑", s)
+    #Reference state for overlap
+    ψref = ITensorNetwork(v -> "↓", s)
+    #Maximum bond dimension and the SVD cutoff to use
     maxdim, cutoff = 10, 1e-14
     apply_kwargs = (; maxdim, cutoff)
-    #Parameters for BP, as the graph is not a tree (it has loops), we need to specify these
-    bp_update_kwargs = (; maxiter = 25, tol = 1e-8)
+    #Parameters for BP, as the graph is a tree (no loops), BP will automatically set the right parameters
+    bp_update_kwargs = (;)
     bpc = build_bp_cache(ψ; bp_update_kwargs...)
-    h, J = 0.5, -1.0
-    no_trotter_steps = 10
-    δt = 1e-2
 
-    #Specifying the circuit, here we do CX on each neighbouring pair of qubits followed by Rn on all qubits
-    H = ising(g; h, J1 = J)
-    U = exp(-im * δt * H, alg = Trotter{2}())
-    gates = Vector{ITensor}(U, s)
+    #Specifying the circuit, each gates is [string, vertices to act on, optional_params]
+    # gates = [
+    #     ("X", [(1, 1)]),                        # Pauli X on qubit 1
+    #     ("CX", [(1, 1), (2, 1)]),                   # Controlled-X on qubits [1,2]
+    #     ("Rx", [(2, 1)], (θ = 0.5,)),              # Rotation of θ around X
+    #     ("Rn", [(3, 1)], (θ = 0.5, ϕ = 0.2, λ = 1.2)), # Arbitrary rotation with angles (θ,ϕ,λ)
+    #     ("√SWAP", [(3, 1), (4, 1)]),                # Sqrt Swap on qubits [3,4]
+    #     ("T", [(4, 1)]),
+    # ]
 
-    #Vertices to measure "Z" on
-    vs_measure = [(1,), (nqubits,)]
+    no_layers = 3
 
-    χinit = maxlinkdim(ψ)
-    println("Initial bond dimension of the state is $χinit")
-
-    expect_sigmaz = real.(expect(ψ, "Z", vs_measure))
+    expect_sigmaz = real.(expect(ψ, "Z", [(1, 1), (3, 1)]))
     println("Initial Sigma Z on selected sites is $expect_sigmaz")
-    time = 0
 
-    for i = 1:no_trotter_steps
-        println("Time is $time")
+    f = sq_overlap(ψ, ψref)
+    println("Initial Overlap with all spins down is $f")
+
+    ρ = two_site_rdm(ψ, (1, 1), (2, 1); (cache!) = Ref(bpc))
+    println("Initial RDM on selected sites is $ρ")
+
+    #Run the circuit
+    for i = 1:no_layers
+        println("Running circuit layer $i")
         for gate in gates
-            ψ, bpc = apply(gate, ψ, bpc; reset_all_messages = false, apply_kwargs...)
+            o = gate_to_itensor(gate, s)
+            ψ, bpc = apply(o, ψ, bpc; apply_kwargs...)
+            #Update the BP cache after each gate here.
+            bpc = update(bpc; bp_update_kwargs...)
         end
-        #Update the BP cache after each trotter step here. Should be frequent enough is delta_t << 1
-        bpc = update(bpc; bp_update_kwargs...)
-        time += δt
+
     end
 
-    χfinal = maxlinkdim(ψ)
-    println("Final bond dimension of the state is $χfinal")
-
-    expect_sigmaz = real.(expect(ψ, "Z", vs_measure))
+    expect_sigmaz = real.(expect(ψ, "Z", [(1, 1), (3, 1)]))
     println("Initial Sigma Z on selected sites is $expect_sigmaz")
-end
 
-main()
+    f = sq_overlap(ψ, ψref)
+    println("Final Overlap with all spins down is $f")
 
-
+    ρ = two_site_rdm(ψ, (1, 1), (2, 1), (cache!) = Ref(bpc))
+    println("Final RDM on selected sites is $ρ")
 end
