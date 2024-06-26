@@ -1,13 +1,21 @@
-from juliacall import Main as jl; 
-jl.seval(
-    """using Pkg; 
-         Pkg.add("NamedGraphs"); 
-         Pkg.add("ITensors"); 
-         Pkg.add("ITensorNetworks"); 
-         Pkg.add("Graphs"); 
-         Pkg.add("DataGraphs");
-         Pkg.add("Glob"); 
-         Pkg.add("Dictionaries"); 
-         Pkg.add("SplitApplyCombine");
-         Pkg.develop(path="./")"""
+# See pyproject.toml for project configuration.
+# This file exists for compatibility with legacy tools:
+# https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html
+
+from setuptools import setup, find_packages
+import subprocess
+
+setup(
+    name="ITensorNetworksQiskit",
+    version="0.0",
+    description="ITensorNetworksQiskit",
+    author="Lewis Anderson, Kate Marshall",
+    author_email="lewis.anderson@ibm.com, kate.marshall@ibm.com",
+    license="MIT",
+    packages=find_packages(),
+    zip_safe=False,
+    install_requires=[
+        "qiskit~=1.0.2",
+        "juliacall",
+    ],
 )

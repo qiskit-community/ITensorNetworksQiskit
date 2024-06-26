@@ -55,4 +55,5 @@ function circuitMPS(L, gates)
 
     ρ = two_site_rdm(ψ, (1, 1), (2, 1), (cache!) = Ref(bpc))
     println("Final RDM on selected sites is $ρ")
+    return ρ
 end
