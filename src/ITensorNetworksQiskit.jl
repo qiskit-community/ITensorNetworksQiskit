@@ -6,6 +6,10 @@ include("utils.jl")
 
 function circuitMPS(L, gates)
 
+    if startswith(gates, "[")
+        gates = eval(Meta.parse(gates))
+    end
+
     #Build the graph that reflects our tensor network
     g = named_grid((L, 1))
     s = siteinds("S=1/2", g)
