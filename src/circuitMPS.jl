@@ -4,9 +4,12 @@ using ITensorNetworks: ITensorNetwork, update
 
 include("utils.jl")
 
-function main()
+function circuitMPS(L, gates)
 
-    L = 4
+    if startswith(gates, "[")
+        gates = eval(Meta.parse(gates))
+    end
+
     #Build the graph that reflects our tensor network
     g = named_grid((L, 1))
     s = siteinds("S=1/2", g)
@@ -22,16 +25,14 @@ function main()
     bpc = build_bp_cache(ψ; bp_update_kwargs...)
 
     #Specifying the circuit, each gates is [string, vertices to act on, optional_params]
-    gates = [
-        ("X", [(1, 1)]),                        # Pauli X on qubit 1
-        ("CX", [(1, 1), (2, 1)]),                   # Controlled-X on qubits [1,2]
-        ("Rx", [(2, 1)], (θ = 0.5,)),              # Rotation of θ around X
-        ("Rn", [(3, 1)], (θ = 0.5, ϕ = 0.2, λ = 1.2)), # Arbitrary rotation with angles (θ,ϕ,λ)
-        ("√SWAP", [(3, 1), (4, 1)]),                # Sqrt Swap on qubits [3,4]
-        ("T", [(4, 1)]),
-    ]
-
-    no_layers = 3
+    # gates = [
+    #     ("X", [(1, 1)]),                        # Pauli X on qubit 1
+    #     ("CX", [(1, 1), (2, 1)]),                   # Controlled-X on qubits [1,2]
+    #     ("Rx", [(2, 1)], (θ = 0.5,)),              # Rotation of θ around X
+    #     ("Rn", [(3, 1)], (θ = 0.5, ϕ = 0.2, λ = 1.2)), # Arbitrary rotation with angles (θ,ϕ,λ)
+    #     ("√SWAP", [(3, 1), (4, 1)]),                # Sqrt Swap on qubits [3,4]
+    #     ("T", [(4, 1)]),
+    # ]
 
     expect_sigmaz = real.(expect(ψ, "Z", [(1, 1), (3, 1)]))
     println("Initial Sigma Z on selected sites is $expect_sigmaz")
@@ -43,15 +44,11 @@ function main()
     println("Initial RDM on selected sites is $ρ")
 
     #Run the circuit
-    for i = 1:no_layers
-        println("Running circuit layer $i")
-        for gate in gates
-            o = gate_to_itensor(gate, s)
-            ψ, bpc = apply(o, ψ, bpc; apply_kwargs...)
-            #Update the BP cache after each gate here.
-            bpc = update(bpc; bp_update_kwargs...)
-        end
-
+    for gate in gates
+        o = gate_to_itensor(gate, s)
+        ψ, bpc = apply(o, ψ, bpc; apply_kwargs...)
+        #Update the BP cache after each gate here.
+        bpc = update(bpc; bp_update_kwargs...)
     end
 
     expect_sigmaz = real.(expect(ψ, "Z", [(1, 1), (3, 1)]))
@@ -62,6 +59,5 @@ function main()
 
     ρ = two_site_rdm(ψ, (1, 1), (2, 1), (cache!) = Ref(bpc))
     println("Final RDM on selected sites is $ρ")
-end
 
-main()
+end
