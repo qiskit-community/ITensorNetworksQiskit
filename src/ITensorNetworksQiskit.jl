@@ -6,5 +6,6 @@ export mps_from_circuit
 export overlap_with_zero_from_circ
 export sigmaz_expectation
 export two_site_rdm_from_circuit
+export sq_overlap
 
 end  # module ITensorNetworksQiskit
