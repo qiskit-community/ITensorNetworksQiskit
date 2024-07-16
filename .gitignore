@@ -1,2 +1,15 @@
-/Manifest.toml
+/**/__pycache__/*
+.vscode/
+.idea*
+*.egg-info/
+
 .idea
+
+### macOS ###
+# General
+.DS_Store
+.AppleDouble
+.LSOverride
+
+
+/Manifest.toml

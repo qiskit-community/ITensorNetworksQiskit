@@ -1,8 +1,7 @@
 from juliacall import Main as jl
 from qiskit import QuantumCircuit
-from qiskit.circuit import Qubit
 
-from utils import qiskit_circ_to_itn_circ
+from itensornetworks_qiskit.utils import qiskit_circ_to_itn_circ
 
 jl.seval("using ITensorNetworksQiskit")
 
