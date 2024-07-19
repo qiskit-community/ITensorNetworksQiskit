@@ -4,10 +4,9 @@ using ITensorNetworks: ITensorNetwork, update, maxlinkdim
 
 include("utils.jl")
 
-function main()
-
-    nx, ny = 2, 2
-    #Build a qubit layout of 2x2 heavy hexagons
+function heavy_hex_example()
+    nx, ny = 2, 3
+    #Build a qubit layout of 2x3 heavy hexagons (49 qubits)
     g = heavy_hex_lattice_graph(nx, ny)
     nqubits = length(vertices(g))
     s = siteinds("S=1/2", g)
@@ -23,6 +22,7 @@ function main()
     two_site_gates = [("CX", [src(e), dst(e)]) for e in edges(g)]
     single_site_gates = [("Rn", [v], (θ = 0.5, ϕ = 0.2, λ = 1.2)) for v in vertices(g)]
     gates = vcat(two_site_gates, single_site_gates)
+    println(gates)
 
     no_layers = 3
     #Edge (pair of neighboring qubits) to take the rdm for
@@ -65,4 +65,45 @@ function main()
     println("Final RDM on selected sites is $ρ")
 end
 
-main()
+heavy_hex_example()
+
+function tn_from_circuit(nx, ny, gates, chi, s)
+    if startswith(gates, "[")
+        gates = eval(Meta.parse(gates))
+    end
+    #Initialise the tensor network, all qubits down (in Z basis)
+    ψ = ITensorNetwork(v -> "↑", s)
+    #Maximum bond dimension and the SVD cutoff to use
+    maxdim, cutoff = chi, 1e-14
+    apply_kwargs = (; maxdim, cutoff)
+    #Parameters for BP, as the graph is a tree (no loops), BP will automatically set the right parameters
+    bp_update_kwargs = (;)
+    bpc = build_bp_cache(ψ; bp_update_kwargs...)
+
+    #Build a qubit layout of 2x2 heavy hexagons
+    g = heavy_hex_lattice_graph(nx, ny)
+    nqubits = length(vertices(g))
+    s = siteinds("S=1/2", g)
+    ψ = ITensorNetwork(v -> "↑", s)
+    ψref = ITensorNetwork(v -> "↓", s)
+    maxdim, cutoff = 10, 1e-14
+    apply_kwargs = (; maxdim, cutoff)
+    #Parameters for BP, as the graph is not a tree (it has loops), we need to specify these
+    bp_update_kwargs = (; maxiter = 25, tol = 1e-8)
+    bpc = build_bp_cache(ψ; bp_update_kwargs...)
+
+    #Run the circuit
+    for gate in gates
+        o = gate_to_itensor(gate, s)
+        ψ, bpc = apply(o, ψ, bpc; apply_kwargs...)
+        #Update the BP cache after each gate here.
+        bpc = update(bpc; bp_update_kwargs...)
+    end
+
+    return ψ, bpc
+end
+
+function generate_graph(nx, ny)
+    g = heavy_hex_lattice_graph(nx, ny)
+    return g
+end
