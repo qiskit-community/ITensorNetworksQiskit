@@ -65,45 +65,47 @@ function heavy_hex_example()
     println("Final RDM on selected sites is $ρ")
 end
 
-heavy_hex_example()
-
-function tn_from_circuit(nx, ny, gates, chi, s)
+function tn_from_circuit(gates, chi, s, nlayers)
     if startswith(gates, "[")
         gates = eval(Meta.parse(gates))
     end
-    #Initialise the tensor network, all qubits down (in Z basis)
     ψ = ITensorNetwork(v -> "↑", s)
-    #Maximum bond dimension and the SVD cutoff to use
     maxdim, cutoff = chi, 1e-14
-    apply_kwargs = (; maxdim, cutoff)
-    #Parameters for BP, as the graph is a tree (no loops), BP will automatically set the right parameters
-    bp_update_kwargs = (;)
-    bpc = build_bp_cache(ψ; bp_update_kwargs...)
-
-    #Build a qubit layout of 2x2 heavy hexagons
-    g = heavy_hex_lattice_graph(nx, ny)
-    nqubits = length(vertices(g))
-    s = siteinds("S=1/2", g)
-    ψ = ITensorNetwork(v -> "↑", s)
-    ψref = ITensorNetwork(v -> "↓", s)
-    maxdim, cutoff = 10, 1e-14
     apply_kwargs = (; maxdim, cutoff)
     #Parameters for BP, as the graph is not a tree (it has loops), we need to specify these
     bp_update_kwargs = (; maxiter = 25, tol = 1e-8)
     bpc = build_bp_cache(ψ; bp_update_kwargs...)
 
-    #Run the circuit
-    for gate in gates
-        o = gate_to_itensor(gate, s)
-        ψ, bpc = apply(o, ψ, bpc; apply_kwargs...)
-        #Update the BP cache after each gate here.
+    for i = 1:nlayers
+        println("Running circuit layer $i")
+        for gate in gates
+            o = gate_to_itensor(gate, s)
+            ψ, bpc = apply(o, ψ, bpc; reset_all_messages = false, apply_kwargs...)
+        end
+        #Update the BP cache after each layer here. Should be good until we start making truncations.
         bpc = update(bpc; bp_update_kwargs...)
     end
+
 
     return ψ, bpc
 end
 
 function generate_graph(nx, ny)
     g = heavy_hex_lattice_graph(nx, ny)
-    return g
+    nqubits = length(vertices(g))
+    return g, nqubits
+end
+
+function sigmaz_expectation_2d(ψ, sites)
+    sites_tuples = [(n,) for n in sites]
+    expect_sigmaz = real.(expect(ψ, "Z", sites_tuples))
+end
+
+#TODO generalise this to pass in a tuple of a pair which is known to be in the graph
+function get_first_edge_rdm_2d(ψ, bpc, g)
+     first_edge = first(edges(g))
+     println(first_edge)
+     site1, site2 = src(first_edge), dst(first_edge)
+     ρ = two_site_rdm(ψ, site1, site2, (cache!) = Ref(bpc))
+     return ρ
 end
