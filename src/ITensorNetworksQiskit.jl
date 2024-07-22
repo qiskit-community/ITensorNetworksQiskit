@@ -3,9 +3,11 @@ module ITensorNetworksQiskit
 include("circuitMPS.jl")
 export circuitMPS
 export mps_from_circuit
-export overlap_with_zero_from_circ
+export generate_siteindices
+export overlap_with_zero
 export sigmaz_expectation
-export two_site_rdm_from_circuit
+export two_site_rdm
+export sq_overlap
 
 include("circuitHeavyHex.jl")
 export heavy_hex_example
