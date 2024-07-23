@@ -56,23 +56,23 @@ function itensors_mps_example()
     println("Two samples from ψ are $(first(samples)) and $(last(samples))")
 end
 
-function mps_from_circuit_itensors(L, gates, chi, s)
+function mps_from_circuit_itensors(L, gates, maxdim, cutoff, s)
     if startswith(gates, "[")
         gates = eval(Meta.parse(gates))
     end
-    #Initialise the tensor network, all qubits down (in Z basis)
-    ψ = MPS(s, ["Up" for n in 1:L])
-    #Maximum bond dimension and the SVD cutoff to use
-    maxdim, cutoff = chi, 1e-14
-    apply_kwargs = (; maxdim, cutoff)
 
-    #Run the circuit
+    ψ = MPS(s, ["Up" for n in 1:L])
+    apply_kwargs = (; maxdim, cutoff)
     for gate in gates
         o = op(gate, s)
         ψ = apply(o, ψ; apply_kwargs...)
     end
 
     return ψ
+end
+
+function mps_from_circuit_itensors(L, gates, chi, s)
+   return mps_from_circuit_itensors(L, gates, chi, 1e-14, s)
 end
 
 function generate_siteindices_itensors(L)
