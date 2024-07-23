@@ -84,6 +84,41 @@ def qiskit_circ_to_itn_circ_2d(qc: QuantumCircuit):
     gates += ']'
     return gates
 
+def qiskit_circ_to_it_circ(qc: QuantumCircuit):
+    gates = '['
+    for qiskit_gate in qc:
+        if qiskit_gate.operation.name == 'u':
+            qubit = jl_qubit_int_from_qiskit_qubit_obj(qiskit_gate.qubits[0])
+            theta, phi, lam = qiskit_gate.operation.params
+            gates += f'("Rn", {qubit}, (θ = {theta}, ϕ = {phi}, λ = {lam})), '
+        elif qiskit_gate.operation.name == 'rx':
+            qubit = jl_qubit_int_from_qiskit_qubit_obj(qiskit_gate.qubits[0])
+            theta, = qiskit_gate.operation.params
+            gates += f'("Rx", {qubit}, (θ = {theta},)), '
+        elif qiskit_gate.operation.name == 'ry':
+            qubit = jl_qubit_int_from_qiskit_qubit_obj(qiskit_gate.qubits[0])
+            theta, = qiskit_gate.operation.params
+            gates += f'("Ry", {qubit}, (θ = {theta},)), '
+        elif qiskit_gate.operation.name == 'rz':
+            qubit = jl_qubit_int_from_qiskit_qubit_obj(qiskit_gate.qubits[0])
+            theta, = qiskit_gate.operation.params
+            gates += f'("Rz", {qubit}, (θ = {theta},)), '
+        elif qiskit_gate.operation.name == 't':
+            qubit = jl_qubit_int_from_qiskit_qubit_obj(qiskit_gate.qubits[0])
+            gates += f'("T", {qubit}), '
+        elif qiskit_gate.operation.name == 'cx':
+            ctrl = jl_qubit_int_from_qiskit_qubit_obj(qiskit_gate.qubits[0])
+            tgt = jl_qubit_int_from_qiskit_qubit_obj(qiskit_gate.qubits[1])
+            gates += f'("CX", {ctrl},{tgt}), '
+        elif qiskit_gate.operation.name == 'swap':
+            ctrl = jl_qubit_int_from_qiskit_qubit_obj(qiskit_gate.qubits[0])
+            tgt = jl_qubit_int_from_qiskit_qubit_obj(qiskit_gate.qubits[1])
+            gates += f'("SWAP", {ctrl},{tgt}), '
+        else:
+            raise ValueError('Unknown gate')
+
+    gates += ']'
+    return gates
 
 def extract_itn_graph(g):
     output_capture = io.StringIO()
