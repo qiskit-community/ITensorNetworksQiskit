@@ -38,6 +38,7 @@ def qiskit_circ_to_itn_circ(qc: QuantumCircuit):
 
     return "[" + ", ".join(gates) + "]"
 
+
 # This is the same function as above but the gates are needed a different form. Instead of the
 # index listed as [({qubit}, 1)] it needs to be [({qubit}),].
 def qiskit_circ_to_itn_circ_2d(qc: QuantumCircuit):
@@ -67,6 +68,7 @@ def qiskit_circ_to_itn_circ_2d(qc: QuantumCircuit):
             raise ValueError(f"Unknown gate: {name}")
 
     return "[" + ", ".join(gates) + "]"
+
 
 # Again, this is very similar to the functions as above but the gates need to be a different form.
 # Instead of the index listed as [({qubit}, 1)] or [({qubit}),] it needs to be simply {qubit}
@@ -98,6 +100,7 @@ def qiskit_circ_to_it_circ(qc: QuantumCircuit):
 
     return "[" + ", ".join(gates) + "]"
 
+
 def extract_itn_graph(g):
     output_capture = io.StringIO()
     sys.stdout = output_capture
@@ -108,5 +111,5 @@ def extract_itn_graph(g):
     edges_str = julia_output.split(" edge(s):")[1].strip()
     edge_pattern = re.compile(r"\((\d+),\) => \((\d+),\)")
     edges = edge_pattern.findall(edges_str)
-    edges_tuples = [(int(x)-1, int(y)-1) for x, y in edges]
+    edges_tuples = [(int(x) - 1, int(y) - 1) for x, y in edges]
     return edges_tuples
