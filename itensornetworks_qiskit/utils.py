@@ -68,6 +68,8 @@ def qiskit_circ_to_itn_circ_2d(qc: QuantumCircuit):
 
     return "[" + ", ".join(gates) + "]"
 
+# Again, this is very similar to the functions as above but the gates need to be a different form.
+# Instead of the index listed as [({qubit}, 1)] or [({qubit}),] it needs to be simply {qubit}
 def qiskit_circ_to_it_circ(qc: QuantumCircuit):
     gates = '['
     for qiskit_gate in qc:
