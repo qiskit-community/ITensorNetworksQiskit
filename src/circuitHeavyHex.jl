@@ -22,7 +22,7 @@ function heavy_hex_example()
     two_site_gates = [("CX", [src(e), dst(e)]) for e in edges(g)]
     single_site_gates = [("Rn", [v], (θ = 0.5, ϕ = 0.2, λ = 1.2)) for v in vertices(g)]
     gates = vcat(two_site_gates, single_site_gates)
-    println(gates)
+    # println("Gates to append to circuit are $gates")
 
     no_layers = 3
     #Edge (pair of neighboring qubits) to take the rdm for
@@ -104,7 +104,7 @@ end
 #TODO generalise this to pass in a tuple of a pair which is known to be in the graph
 function get_first_edge_rdm_2d(ψ, bpc, g)
      first_edge = first(edges(g))
-     println(first_edge)
+     println("First edge is $first_edge")
      site1, site2 = src(first_edge), dst(first_edge)
      ρ = two_site_rdm(ψ, site1, site2, (cache!) = Ref(bpc))
      return ρ
