@@ -10,8 +10,6 @@ qc = QuantumCircuit(n)
 
 for i in range(n):
     qc.u(1., 2., 3., i)
-    # NB: currently, requirement of julia code being used is that two qubits gates only act on
-    # nearest neighbour qubits (non-cyclic)
 for i in range(n - 1):
     qc.cx(i, i + 1)
 for i in range(n):
