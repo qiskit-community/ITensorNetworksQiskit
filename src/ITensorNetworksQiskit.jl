@@ -27,5 +27,6 @@ export generate_siteindices_itensors
 export overlap_with_zero_itensors
 export overlap_itensors
 export sigmaz_expectation_itensors
+export mps_from_circuit_and_mps_itensors
 
 end  # module ITensorNetworksQiskit
