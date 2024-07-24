@@ -4,7 +4,7 @@ using ITensorNetworks: ITensorNetwork, update
 
 include("utils.jl")
 
-function circuitMPS(L, gates)
+function circuit_mps(L, gates)
 
     if startswith(gates, "[")
         gates = eval(Meta.parse(gates))

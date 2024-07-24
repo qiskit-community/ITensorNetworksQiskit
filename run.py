@@ -24,4 +24,4 @@ for i in range(n):
     qc.t(i)
 
 gates = qiskit_circ_to_itn_circ(qc)
-jl.circuitMPS(n, gates)
+jl.circuit_mps(n, gates)
