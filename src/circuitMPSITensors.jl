@@ -75,6 +75,20 @@ function mps_from_circuit_itensors(L, gates, chi, s)
    return mps_from_circuit_itensors(L, gates, chi, 1e-14, s)
 end
 
+function mps_from_circuit_and_mps_itensors(ψ, gates, maxdim, cutoff, s)
+    if startswith(gates, "[")
+        gates = eval(Meta.parse(gates))
+    end
+
+    apply_kwargs = (; maxdim, cutoff)
+    for gate in gates
+        o = op(gate, s)
+        ψ = apply(o, ψ; apply_kwargs...)
+    end
+
+    return ψ
+end
+
 function generate_siteindices_itensors(L)
     s = siteinds("S=1/2", L)
     return s
