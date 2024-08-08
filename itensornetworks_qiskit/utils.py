@@ -9,7 +9,6 @@ from qiskit.circuit import Qubit
 def jl_qubit_int_from_qiskit_qubit_obj(qubit: Qubit):
     return qubit._index + 1
 
-
 def qiskit_circ_to_itn_circ(qc: QuantumCircuit):
     gate_formats = {
         "u": lambda qubits, params: f'("Rn", [({qubits[0]}, 1)], (θ = {params[0]}, ϕ = {params[1]}, λ = {params[2]}))',
@@ -79,6 +78,7 @@ def qiskit_circ_to_it_circ(qc: QuantumCircuit):
         "ry": lambda qubits, params: f'("Ry", {qubits[0]}, (θ = {params[0]},))',
         "rz": lambda qubits, params: f'("Rz", {qubits[0]}, (θ = {params[0]},))',
         "t": lambda qubits, _: f'("T", {qubits[0]})',
+        "x": lambda qubits, _: f'("X", {qubits[0]})',
         "cx": lambda qubits, _: f'("CX", {qubits[0]}, {qubits[1]})',
         "swap": lambda qubits, _: f'("SWAP", {qubits[0]}, {qubits[1]})',
     }
@@ -113,3 +113,11 @@ def extract_itn_graph(g):
     edges = edge_pattern.findall(edges_str)
     edges_tuples = [(int(x) - 1, int(y) - 1) for x, y in edges]
     return edges_tuples
+
+
+def prepare_graph_for_itn(itn_circ: str):
+    pattern = r'("CX", \[.*?\])'
+    cx_terms = re.findall(pattern, itn_circ)
+    modified_cx_terms = ["(" + term + ")" for term in cx_terms]
+    joined_cx_terms = ', '.join(modified_cx_terms)
+    return "[" + joined_cx_terms + "]"

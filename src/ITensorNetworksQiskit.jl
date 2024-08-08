@@ -1,7 +1,9 @@
 module ITensorNetworksQiskit
 
-# simple circuit example 
-# circuit passed in as prop
+
+include("utils.jl")
+export build_graph_from_gates
+
 include("circuitMPS.jl")
 export circuit_mps
 export mps_from_circuit

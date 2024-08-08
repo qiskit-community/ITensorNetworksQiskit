@@ -84,6 +84,8 @@ function tn_from_circuit(gates, chi, s, nlayers)
         end
         #Update the BP cache after each layer here. Should be good until we start making truncations.
         bpc = update(bpc; bp_update_kwargs...)
+        max_chi = maxlinkdim(ψ)
+        println("Final chi: $max_chi")
     end
 
 
