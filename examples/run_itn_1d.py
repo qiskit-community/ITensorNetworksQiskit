@@ -23,7 +23,7 @@ s = jl.generate_siteindices(n)
 chi = 10
 psi, bpc = jl.mps_from_circuit(n, itn_circ, chi, s)
 
-print("ITN results")
+print("***** ITN results *****")
 itn_overlap = jl.overlap_with_zero(psi, s)
 itn_eval = jl.sigmaz_expectation(psi, [1, 2])
 itn_rdm = jl.two_site_rdm(psi, bpc, 1, 2)
@@ -32,7 +32,7 @@ print(f"σz expectation value of sites 1 and 2: {itn_eval}")
 print(f"2-qubit RDM of sites 1 and 2: {itn_rdm}")
 print("\n")
 
-print("Qiskit results")
+print("***** Qiskit results *****")
 sv = Statevector(qc)
 qiskit_overlap = (np.abs(sv[0]))**2
 qiskit_eval = [sv.expectation_value(ZGate(), [i]) for i in range(2)]

@@ -22,14 +22,14 @@ gates = qiskit_circ_to_it_circ(qc)
 s = jl.generate_siteindices_itensors(n)
 psi = jl.mps_from_circuit_itensors(n, gates, 10, s)
 
-print("ITensors results")
+print("***** ITensors results *****")
 itn_overlap = jl.overlap_with_zero_itensors(n, psi, s)
 itn_eval = jl.sigmaz_expectation_itensors(psi, [1, 2])
 print(f"Overlap with zero state: {itn_overlap}")
 print(f"σz expectation value of sites 1 and 2: {itn_eval}")
 print("\n")
 
-print("Qiskit results")
+print("***** Qiskit results *****")
 sv = Statevector(qc)
 qiskit_overlap = (np.abs(sv[0]))**2
 qiskit_eval = [sv.expectation_value(ZGate(), [i]) for i in range(2)]

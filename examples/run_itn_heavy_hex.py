@@ -44,7 +44,7 @@ psi, bpc = jl.tn_from_circuit(itn_circ, chi, s, n_layers)
 t = datetime.now() - start_time
 print(t)
 
-print("ITN results")
+print("***** ITN results *****")
 itn_overlap = jl.overlap_with_zero(psi, s)
 itn_eval = jl.sigmaz_expectation_2d(psi, [1, 2])
 itn_rdm = jl.get_first_edge_rdm_2d(psi, bpc, g)
