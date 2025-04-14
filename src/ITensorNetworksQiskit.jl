@@ -1,5 +1,6 @@
 module ITensorNetworksQiskit
 
+include("imports.jl")
 include("utils.jl")
 export build_graph_from_gates
 
@@ -18,16 +19,5 @@ export generate_graph
 export tn_from_circuit
 export sigmaz_expectation_2d
 export get_first_edge_rdm_2d
-
-# simple circuit example
-# uses efficient iTensors MPS implementation
-# circuit passed in as prop
-include("circuitMPSITensors.jl")
-export mps_from_circuit_itensors
-export generate_siteindices_itensors
-export overlap_with_zero_itensors
-export overlap_itensors
-export sigmaz_expectation_itensors
-export mps_from_circuit_and_mps_itensors
 
 end  # module ITensorNetworksQiskit

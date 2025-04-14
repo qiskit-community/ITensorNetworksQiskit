@@ -14,7 +14,7 @@ setup(
     packages=find_packages(),
     zip_safe=False,
     install_requires=[
-        "qiskit~=1.0.2",
+        "qiskit~=1.3",
         "juliacall",
     ],
 )
