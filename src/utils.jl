@@ -8,20 +8,20 @@ function build_bp_cache(ψ::AbstractITensorNetwork; kwargs...)
 end
 
 function ITensors.apply(
-  o::ITensor,
-  ψ::AbstractITensorNetwork,
-  bpc::BeliefPropagationCache;
-  reset_all_messages=false,
-  apply_kwargs...,
-)
-  bpc = copy(bpc)
-  ψ = copy(ψ)
-  vs = neighbor_vertices(ψ, o)
-  envs = incoming_messages(bpc, PartitionVertex.(vs))
-  singular_values! = Ref(ITensor())
-  ψ = noprime(apply(o, ψ; envs, singular_values!, apply_kwargs...))
-  ψdag = prime(dag(ψ))
-  if length(vs) == 2
+    o::ITensor,
+    ψ::AbstractITensorNetwork,
+    bpc::BeliefPropagationCache;
+    reset_all_messages=false,
+    apply_kwargs...,
+    )
+    bpc = copy(bpc)
+    ψ = copy(ψ)
+    vs = neighbor_vertices(ψ, o)
+    envs = incoming_messages(bpc, PartitionVertex.(vs))
+    singular_values! = Ref(ITensor())
+    ψ = noprime(apply(o, ψ; envs, singular_values!, apply_kwargs...))
+    ψdag = prime(dag(ψ))
+    if length(vs) == 2
     v1, v2 = vs
     pe = partitionedge(bpc, (v1, "bra") => (v2, "bra"))
     mts = messages(bpc)
@@ -36,12 +36,12 @@ function ITensors.apply(
     else
       bpc = BeliefPropagationCache(partitioned_tensornetwork(bpc))
     end
-  end
-  for v in vs
+    end
+    for v in vs
     bpc = update_factor(bpc, (v, "ket"), ψ[v])
     bpc = update_factor(bpc, (v, "bra"), ψdag[v])
-  end
-  return ψ, bpc
+    end
+    return ψ, bpc
 end
 
 function gate_to_itensor(gate, s::IndsNetwork)
@@ -60,26 +60,26 @@ end
 
 #Note that region should consist of contiguous vertices here!
 function rdm(ψ::ITensorNetwork, region; (cache!)=nothing, cache_update_kwargs=(;))
-  cache = isnothing(cache!) ? build_bp_cache(ψ; cache_update_kwargs...) : cache![]
-  ψIψ = tensornetwork(cache)
+    cache = isnothing(cache!) ? build_bp_cache(ψ; cache_update_kwargs...) : cache![]
+    ψIψ = tensornetwork(cache)
 
-  state_tensors = vcat(
+    state_tensors = vcat(
     ITensor[ψIψ[ket_vertex(ψIψ, v)] for v in region],
     ITensor[ψIψ[bra_vertex(ψIψ, v)] for v in region],
-  )
-  env = incoming_messages(cache, PartitionVertex.(region))
+    )
+    env = incoming_messages(cache, PartitionVertex.(region))
 
-  rdm = contract(ITensor[env; state_tensors]; sequence="automatic")
+    rdm = contract(ITensor[env; state_tensors]; sequence="automatic")
 
-  s = siteinds(ψ)
-  rdm = permute(
+    s = siteinds(ψ)
+    rdm = permute(
     rdm, vcat(reduce(vcat, [s[v] for v in region]), reduce(vcat, [s[v]' for v in region]))
-  )
+    )
 
-  rdm = array((rdm * combiner(inds(rdm; plev=0)...)) * combiner(inds(rdm; plev=1)...))
-  rdm /= tr(rdm)
+    rdm = array((rdm * combiner(inds(rdm; plev=0)...)) * combiner(inds(rdm; plev=1)...))
+    rdm /= tr(rdm)
 
-  return rdm
+    return rdm
 end
 
 function heavy_hex_lattice_graph(n::Int64, m::Int64)
