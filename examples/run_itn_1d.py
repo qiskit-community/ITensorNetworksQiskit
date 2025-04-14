@@ -1,3 +1,6 @@
+"""Example building a small random 1D circuit, generating the MPS representation using ITN and
+validating observables against Qiskit state vector simulation"""
+
 import numpy as np
 from juliacall import Main as jl
 from qiskit.circuit.library import ZGate

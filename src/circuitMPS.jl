@@ -1,14 +1,11 @@
-using NamedGraphs.NamedGraphGenerators: named_grid
-using ITensors: siteinds, expect
-using ITensorNetworks: ITensorNetwork, update
 
-include("utils.jl")
-
+# Adapted from main() in
+# https://github.com/JoeyT1994/ITensorNetworksExamples/examples/circuitMPS_ITensorNetworks.jl
 function mps_from_circuit(L, gates, chi, s)
     if startswith(gates, "[")
         gates = eval(Meta.parse(gates))
     end
-    #Initialise the tensor network, all qubits down (in Z basis)
+    #Initialise the tensor network, all qubits up (in Z basis)
     ψ = ITensorNetwork(v -> "↑", s)
     #Maximum bond dimension and the SVD cutoff to use
     maxdim, cutoff = chi, 1e-14
@@ -57,6 +54,6 @@ function sigmaz_expectation(ψ, sites)
 end
 
 function two_site_rdm(ψ, bpc, site1, site2)
-     ρ = two_site_rdm(ψ, (site1, 1), (site2, 1), (cache!) = Ref(bpc))
+     ρ = rdm(ψ, [(site1, 1), (site2, 1)]; (cache!) = Ref(bpc))
      return ρ
 end

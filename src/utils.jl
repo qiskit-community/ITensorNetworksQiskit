@@ -1,104 +1,47 @@
-using ITensors: siteinds, Op, prime, OpSum, apply
-using Graphs:
-    AbstractGraph, SimpleGraph, edges, vertices, is_tree, connected_components, neighbors
-using NamedGraphs: NamedGraph, NamedEdge, NamedGraphs, rename_vertices
-using NamedGraphs.NamedGraphGenerators: named_grid, named_hexagonal_lattice_graph
-using NamedGraphs.GraphsExtensions:
-    decorate_graph_edges,
-    forest_cover,
-    add_edges,
-    rem_edges,
-    add_vertices,
-    rem_vertices,
-    disjoint_union,
-    subgraph,
-    src,
-    dst
-using NamedGraphs.PartitionedGraphs: PartitionVertex, partitionedge
-using ITensorNetworks:
-    BeliefPropagationCache,
-    AbstractITensorNetwork,
-    AbstractFormNetwork,
-    IndsNetwork,
-    ITensorNetwork,
-    insert_linkinds,
-    ttn,
-    union_all_inds,
-    neighbor_vertices,
-    environment,
-    messages,
-    update_factor,
-    message,
-    norm_sqr_network,
-    tensornetwork,
-    split_index,
-    inner,
-    contract,
-    partitioned_tensornetwork
-using DataGraphs: underlying_graph
-using ITensors:
-    ITensor,
-    ITensors,
-    op,
-    noprime,
-    dag,
-    noncommonind,
-    commonind,
-    replaceind,
-    combiner,
-    inds,
-    OpName,
-    @OpName_str,
-    @SiteType_str,
-    diag,
-    map_diag!,
-    diag_itensor
-using ITensors.NDTensors: denseblocks, array, tr
-using SplitApplyCombine: group
-using Dictionaries: Dictionary, set!
+# Many of the functions here are adapted or copied from
+# https://github.com/JoeyT1994/ITensorNetworksExamples so that we have a stable versioned copy here
 
 function build_bp_cache(ψ::AbstractITensorNetwork; kwargs...)
-    ψψ = norm_sqr_network(ψ)
-    bpc = BeliefPropagationCache(ψψ, group(v -> first(v), vertices(ψψ)))
-    bpc = update(bpc; kwargs...)
-    return bpc
+  bpc = BeliefPropagationCache(QuadraticFormNetwork(ψ))
+  bpc = update(bpc; kwargs...)
+  return bpc
 end
 
 function ITensors.apply(
-    o::ITensor,
-    ψ::AbstractITensorNetwork,
-    bpc::BeliefPropagationCache;
-    reset_all_messages = false,
-    apply_kwargs...,
+  o::ITensor,
+  ψ::AbstractITensorNetwork,
+  bpc::BeliefPropagationCache;
+  reset_all_messages=false,
+  apply_kwargs...,
 )
-    bpc = copy(bpc)
-    ψ = copy(ψ)
-    vs = neighbor_vertices(ψ, o)
-    envs = environment(bpc, PartitionVertex.(vs))
-    singular_values! = Ref(ITensor())
-    ψ = noprime(apply(o, ψ; envs, singular_values!, normalize = false, apply_kwargs...))
-    ψdag = prime(dag(ψ); sites = [])
-    if length(vs) == 2
-        v1, v2 = vs
-        pe = partitionedge(bpc, (v1, "bra") => (v2, "bra"))
-        mts = messages(bpc)
-        ind2 = commonind(singular_values![], ψ[v1])
-        δuv = dag(copy(singular_values![]))
-        δuv = replaceind(δuv, ind2, ind2')
-        map_diag!(sign, δuv, δuv)
-        singular_values![] = denseblocks(singular_values![]) * denseblocks(δuv)
-        if !reset_all_messages
-            set!(mts, pe, dag.(ITensor[singular_values![]]))
-            set!(mts, reverse(pe), ITensor[singular_values![]])
-        else
-            bpc = BeliefPropagationCache(partitioned_tensornetwork(bpc))
-        end
+  bpc = copy(bpc)
+  ψ = copy(ψ)
+  vs = neighbor_vertices(ψ, o)
+  envs = incoming_messages(bpc, PartitionVertex.(vs))
+  singular_values! = Ref(ITensor())
+  ψ = noprime(apply(o, ψ; envs, singular_values!, apply_kwargs...))
+  ψdag = prime(dag(ψ))
+  if length(vs) == 2
+    v1, v2 = vs
+    pe = partitionedge(bpc, (v1, "bra") => (v2, "bra"))
+    mts = messages(bpc)
+    ind2 = commonind(singular_values![], ψ[v1])
+    δuv = dag(copy(singular_values![]))
+    δuv = replaceind(δuv, ind2, ind2')
+    map_diag!(sign, δuv, δuv)
+    singular_values![] = denseblocks(singular_values![]) * denseblocks(δuv)
+    if !reset_all_messages
+      set!(mts, pe, dag.(ITensor[singular_values![]]))
+      set!(mts, reverse(pe), ITensor[singular_values![]])
+    else
+      bpc = BeliefPropagationCache(partitioned_tensornetwork(bpc))
     end
-    for v in vs
-        bpc = update_factor(bpc, (v, "ket"), ψ[v])
-        bpc = update_factor(bpc, (v, "bra"), ψdag[v])
-    end
-    return ψ, bpc
+  end
+  for v in vs
+    bpc = update_factor(bpc, (v, "ket"), ψ[v])
+    bpc = update_factor(bpc, (v, "bra"), ψdag[v])
+  end
+  return ψ, bpc
 end
 
 function gate_to_itensor(gate, s::IndsNetwork)
@@ -115,27 +58,28 @@ function sq_overlap(ψ::ITensorNetwork, ϕ::ITensorNetwork; normalized = false, 
     return real(numerator / denominator)
 end
 
-function two_site_rdm(
-    ψ::ITensorNetwork,
-    v1,
-    v2;
-    (cache!) = nothing,
-    cache_update_kwargs = (;),
-)
-    @assert v1 ∈ neighbors(ψ, v2)
-    vs = [v1, v2]
-    cache = isnothing(cache!) ? build_bp_cache(ψ; cache_update_kwargs...) : cache![]
-    ψψ = tensornetwork(cache)
+#Note that region should consist of contiguous vertices here!
+function rdm(ψ::ITensorNetwork, region; (cache!)=nothing, cache_update_kwargs=(;))
+  cache = isnothing(cache!) ? build_bp_cache(ψ; cache_update_kwargs...) : cache![]
+  ψIψ = tensornetwork(cache)
 
-    ψψsplit = split_index(ψψ, NamedEdge.([(v, "bra") => (v, "ket") for v in vs]))
-    env_tensors = environment(cache, [(v, "ket") for v in vs])
-    rdm =
-        contract(vcat(env_tensors, ITensor[ψψsplit[vp] for vp in [(v, "ket") for v in vs]]))
+  state_tensors = vcat(
+    ITensor[ψIψ[ket_vertex(ψIψ, v)] for v in region],
+    ITensor[ψIψ[bra_vertex(ψIψ, v)] for v in region],
+  )
+  env = incoming_messages(cache, PartitionVertex.(region))
 
-    rdm = array((rdm * combiner(inds(rdm; plev = 0)...)) * combiner(inds(rdm; plev = 1)...))
-    rdm /= tr(rdm)
+  rdm = contract(ITensor[env; state_tensors]; sequence="automatic")
 
-    return rdm
+  s = siteinds(ψ)
+  rdm = permute(
+    rdm, vcat(reduce(vcat, [s[v] for v in region]), reduce(vcat, [s[v]' for v in region]))
+  )
+
+  rdm = array((rdm * combiner(inds(rdm; plev=0)...)) * combiner(inds(rdm; plev=1)...))
+  rdm /= tr(rdm)
+
+  return rdm
 end
 
 function heavy_hex_lattice_graph(n::Int64, m::Int64)

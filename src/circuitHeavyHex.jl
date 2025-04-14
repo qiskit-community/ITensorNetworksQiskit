@@ -1,8 +1,5 @@
-using NamedGraphs.NamedGraphGenerators: named_grid
-using ITensors: siteinds, expect
-using ITensorNetworks: ITensorNetwork, update, maxlinkdim
-
-include("utils.jl")
+# Adapted from main() in
+# https://github.com/JoeyT1994/ITensorNetworksExamples/examples/circuitHeavyHex.jl
 
 function tn_from_circuit(gates, chi, s, nlayers)
     if startswith(gates, "[")
@@ -47,6 +44,6 @@ function get_first_edge_rdm_2d(ψ, bpc, g)
      first_edge = first(edges(g))
      println("First edge is $first_edge")
      site1, site2 = src(first_edge), dst(first_edge)
-     ρ = two_site_rdm(ψ, site1, site2, (cache!) = Ref(bpc))
+     ρ = rdm(ψ, [site1, site2]; (cache!) = Ref(bpc))
      return ρ
 end
