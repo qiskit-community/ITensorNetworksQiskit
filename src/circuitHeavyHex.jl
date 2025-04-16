@@ -9,7 +9,7 @@ function tn_from_circuit(gates, chi, s, nlayers)
     maxdim, cutoff = chi, 1e-14
     apply_kwargs = (; maxdim, cutoff)
     #Parameters for BP, as the graph is not a tree (it has loops), we need to specify these
-    bp_update_kwargs = (; maxiter = 25, tol = 1e-8)
+    bp_update_kwargs = (; maxiter=25, tol=1e-8, message_update_kwargs = (; message_update_function = ms -> make_eigs_real.(default_message_update(ms))))
     bpc = build_bp_cache(ψ; bp_update_kwargs...)
 
     for i = 1:nlayers
@@ -34,9 +34,9 @@ function generate_graph(nx, ny)
     return g, nqubits
 end
 
-function sigmaz_expectation_2d(ψ, sites)
+function sigmaz_expectation_2d(ψ, sites, bpc)
     sites_tuples = [(n,) for n in sites]
-    expect_sigmaz = real.(expect(ψ, "Z", sites_tuples))
+    expect_sigmaz = real.(expect(ψ, "Z", sites_tuples; (cache!)=Ref(bpc)))
 end
 
 ## TODO: generalise this to pass in a tuple of a pair which is known to be in the graph

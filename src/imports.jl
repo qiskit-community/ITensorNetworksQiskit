@@ -81,6 +81,7 @@ using ITensorNetworks:
     site_tensors,
     bond_tensors,
     gauge_error
+using ITensorNetworks.ITensorsExtensions: map_eigvals
 using ITensors: Op, prime, OpSum, apply
 using ITensors:
     ITensor,
