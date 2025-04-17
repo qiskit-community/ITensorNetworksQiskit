@@ -56,7 +56,7 @@ def trotter_step(qc):
             qc.rz(np.pi / 2.0, edge[0])
 
 
-for _ in range(2):
+for _ in range(3):
     trotter_step(qc)
 
 qc = transpile(qc, basis_gates=["rx", "ry", "rz", "cx"], optimization_level=3, backend=backend)

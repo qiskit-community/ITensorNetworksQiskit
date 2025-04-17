@@ -16,5 +16,7 @@ setup(
     install_requires=[
         "qiskit~=1.3",
         "juliacall",
+        "matplotlib~=3.9.0",
+        "pylatexenc~=2.10",
     ],
 )
