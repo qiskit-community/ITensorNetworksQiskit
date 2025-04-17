@@ -1,7 +1,25 @@
 # Adapted from main() in
 # https://github.com/JoeyT1994/ITensorNetworksExamples/examples/circuitHeavyHex.jl
 
-function tn_from_circuit(gates, chi, s, nlayers)
+"""
+    tn_from_circuit(gates, chi, s, nlayers, bp_update_freq)
+
+Returns an ITensorNetwork corresponding to the action of the gates on the |00..0> state. See the
+/examples/ directory for examples of usage.
+
+# Arguments
+- `gates`: Gates in the format returned by `qiskit_circ_to_itn_circ_2d()`
+- `chi`: Maximum bond dimension for the simulatin
+- `s`: Site indices as built from ITensorNetworks.siteinds
+- `nlayers`: The number of times to repeat the entire circuit. The belief propagation cache will
+be updated after each layer, which is a good strategy for Trotter circuits.
+- `bp_update_freq`: Defines after how many gates the belief propagation cache should be updated.
+Setting to 0 (default) will not update the cache here, meaning it is only updated through defining
+`nlayers`. Setting to 1 will update the cache after every gate and give the lowest error from the
+BP approximation.
+
+"""
+function tn_from_circuit(gates, chi, s, nlayers, bp_update_freq=0)
     if startswith(gates, "[")
         gates = eval(Meta.parse(gates))
     end
@@ -14,11 +32,14 @@ function tn_from_circuit(gates, chi, s, nlayers)
 
     for i = 1:nlayers
         println("Running circuit layer $i")
-        for gate in gates
+        for (j, gate) in enumerate(gates)
             o = gate_to_itensor(gate, s)
             ψ, bpc = apply(o, ψ, bpc; reset_all_messages = false, apply_kwargs...)
+            if bp_update_freq > 0 && j % bp_update_freq == 0
+                bpc = update(bpc; bp_update_kwargs...)
+            end
         end
-        #Update the BP cache after each layer here. Should be good until we start making truncations.
+        #Update the BP cache after each layer here
         bpc = update(bpc; bp_update_kwargs...)
         max_chi = maxlinkdim(ψ)
         println("Final chi: $max_chi")
