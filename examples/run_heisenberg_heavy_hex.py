@@ -30,8 +30,8 @@ jxx = 1.0
 jyy = 1.0
 jzz = 1.0
 
-qc = QuantumCircuit(127)
-qc.x(range(127)[::2])
+qc = QuantumCircuit(115)
+qc.x(range(115)[::2])
 
 
 def trotter_step(qc):
