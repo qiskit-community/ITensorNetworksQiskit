@@ -1,6 +1,24 @@
 # Adapted from main() in
 # https://github.com/JoeyT1994/ITensorNetworksExamples/examples/circuitHeavyHex.jl
 
+"""
+    tn_from_circuit(gates, chi, s, nlayers, bp_update_freq)
+
+Returns an ITensorNetwork corresponding to the action of the gates on the |00..0> state. See the
+/examples/ directory for examples of usage.
+
+# Arguments
+- `gates`: Gates in the format returned by `qiskit_circ_to_itn_circ_2d()`
+- `chi`: Maximum bond dimension for the simulatin
+- `s`: Site indices as built from ITensorNetworks.siteinds
+- `nlayers`: The number of times to repeat the entire circuit. The belief propagation cache will
+be updated after each layer, which is a good strategy for Trotter circuits.
+- `bp_update_freq`: Defines after how many gates the belief propagation cache should be updated.
+Setting to 0 (default) will not update the cache here, meaning it is only updated through defining
+`nlayers`. Setting to 1 will update the cache after every gate and give the lowest error from the
+BP approximation.
+
+"""
 function tn_from_circuit(gates, chi, s, nlayers, bp_update_freq=0)
     if startswith(gates, "[")
         gates = eval(Meta.parse(gates))
