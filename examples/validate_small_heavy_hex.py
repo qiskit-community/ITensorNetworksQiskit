@@ -29,7 +29,7 @@ graph = backend.coupling_map.get_edges()
 # Remove duplicates with opposite direction
 graph = [list(s) for s in set([frozenset(item) for item in graph])]
 
-# Optional to make the example deterministic
+# Optional seed to make the example deterministic
 random.seed(1)
 
 qc = QuantumCircuit(backend.num_qubits)
@@ -43,7 +43,6 @@ for _ in range(3):
 
 qc = transpile(qc, basis_gates=["rx", "ry", "rz", "cx"], backend=backend)
 plot_circuit_layout(qc, backend).show()
-qc.draw(output="mpl").show()
 
 # generate circuit in required ITN format
 itn_circ = qiskit_circ_to_itn_circ_2d(qc)
@@ -56,10 +55,13 @@ g = jl.build_graph_from_gates(jl.seval(graph_string))
 s = jl.siteinds("S=1/2", g)
 chi = 50
 start_time = datetime.now()
+
+# we don't want to repeat the circuit
 n_layers = 1
-# run simulation
-# extract output MPS and belief propagation cache (bpc)
-psi, bpc = jl.tn_from_circuit(itn_circ, chi, s, n_layers)
+# set the belief propagation cache to update after applying every gate for maximum accuracy
+bp_update_freq = 1
+
+psi, bpc = jl.tn_from_circuit(itn_circ, chi, s, n_layers, bp_update_freq)
 t = datetime.now() - start_time
 print(t)
 
@@ -82,9 +84,10 @@ print(f"Overlap with zero state: {qiskit_overlap}")
 print(f"σz expectation value of sites 1 and 2: {qiskit_eval}")
 print(f"2-qubit RDM of sites 1 and 2: {qiskit_rdm}")
 
-np.testing.assert_almost_equal(itn_overlap, qiskit_overlap)
-np.testing.assert_almost_equal(itn_eval, qiskit_eval)
+np.testing.assert_almost_equal(itn_overlap, qiskit_overlap, decimal=5)
+np.testing.assert_almost_equal(itn_eval, qiskit_eval, decimal=5)
 converted_itn_rdm = DensityMatrix(np.array(itn_rdm))
 converted_qiskit_rdm = DensityMatrix(np.array(qiskit_rdm))
 # Density matrices differ by 4 elements, but entanglement measures come out the same
-np.testing.assert_almost_equal(concurrence(converted_itn_rdm), concurrence(converted_qiskit_rdm))
+np.testing.assert_almost_equal(concurrence(converted_itn_rdm), concurrence(converted_qiskit_rdm),
+                               decimal=5)

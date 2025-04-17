@@ -1,7 +1,7 @@
 # Adapted from main() in
 # https://github.com/JoeyT1994/ITensorNetworksExamples/examples/circuitHeavyHex.jl
 
-function tn_from_circuit(gates, chi, s, nlayers)
+function tn_from_circuit(gates, chi, s, nlayers, bp_update_freq=0)
     if startswith(gates, "[")
         gates = eval(Meta.parse(gates))
     end
@@ -14,11 +14,14 @@ function tn_from_circuit(gates, chi, s, nlayers)
 
     for i = 1:nlayers
         println("Running circuit layer $i")
-        for gate in gates
+        for (j, gate) in enumerate(gates)
             o = gate_to_itensor(gate, s)
             ψ, bpc = apply(o, ψ, bpc; reset_all_messages = false, apply_kwargs...)
+            if bp_update_freq > 0 && j % bp_update_freq == 0
+                bpc = update(bpc; bp_update_kwargs...)
+            end
         end
-        #Update the BP cache after each layer here. Should be good until we start making truncations.
+        #Update the BP cache after each layer here
         bpc = update(bpc; bp_update_kwargs...)
         max_chi = maxlinkdim(ψ)
         println("Final chi: $max_chi")
