@@ -87,7 +87,7 @@ print(t)
 
 print("***** ITN results *****")
 itn_overlap = jl.overlap_with_zero(psi, s)
-itn_eval = jl.sigmaz_expectation_2d(psi, [1, 2])
+itn_eval = jl.sigmaz_expectation_2d(psi, [1, 2], bpc)
 print(f"Overlap with zero state: {itn_overlap}")
 print(f"σz expectation value of sites 1 and 2: {itn_eval}")
 print("\n")
