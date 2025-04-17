@@ -1,7 +1,7 @@
 # ITensorNetworksQiskit
 
 **ITensorNetworks Qiskit** is a set of tools that have been built to enable easy use of [ITensorNetworks.jl](https://github.com/ITensor/ITensorNetworks.jl) 
- for tensor network simulations of quantum circuits build in Qiskit. This repository was originally 
+ for tensor network simulations of quantum circuits built in Qiskit. This repository was originally
 contributed to by [Joey Tindall](mailto:jtindall@flatironinstitute.org), who has kindly shared various examples of 
 building ITensorNetworks representations of quantum circuits for simulation experiments. Our 
 contribution on top of this is additional functionality to make this code usable from Qiskit. We have
