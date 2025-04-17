@@ -1,5 +1,6 @@
-"""Example building a large 2D circuit with one layer of random gates, generating the tensor network
- representation using ITN and then computing observables"""
+"""Example building a small 2D circuit with three layers of random gates, generating the tensor
+network representation using ITN and then validating observables against Qiskit state vector
+simulation"""
 
 import random
 from datetime import datetime
