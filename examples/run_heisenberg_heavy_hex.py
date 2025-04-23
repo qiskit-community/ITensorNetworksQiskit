@@ -60,7 +60,6 @@ for _ in range(3):
     trotter_step(qc)
 
 qc = transpile(qc, basis_gates=["rx", "ry", "rz", "cx"], optimization_level=3, backend=backend)
-qc.draw(output='mpl', filename='heisenberg_heavy_hex.pdf', fold=-1)
 
 # convert circuit to required ITN format
 itn_circ = qiskit_circ_to_itn_circ_2d(qc)
