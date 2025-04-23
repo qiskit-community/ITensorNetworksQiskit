@@ -1,9 +1,9 @@
-# ITensorNetworks Qiskit
+# ITensorNetworksQiskit
 
-**ITensorNetworks Qiskit** is a set of tools that have been built to enable easy use of [ITensorNetworks](https://github.com/ITensor/ITensorNetworks.jl)   repo 
-and [ITensor](https://github.com/ITensor/ITensors.jl) for tensor network simulations of quantum circuits from Qiskit. This repository was originally 
+**ITensorNetworks Qiskit** is a set of tools that have been built to enable easy use of [ITensorNetworks.jl](https://github.com/ITensor/ITensorNetworks.jl) 
+ for tensor network simulations of quantum circuits built in Qiskit. This repository was originally
 contributed to by [Joey Tindall](mailto:jtindall@flatironinstitute.org), who has kindly shared various examples of 
-building ITensorNetworks and ITensor representations of quantum circuits for simulation experiments. Our 
+building ITensorNetworks representations of quantum circuits for simulation experiments. Our 
 contribution on top of this is additional functionality to make this code usable from Qiskit. We have
 provided a number of end-to-end examples for using this code in the `examples` folder.
 
@@ -11,7 +11,7 @@ For context, the structure of this repository has been guided by the needs for s
 The role of each folder is as below:
  
  - `src`: is where the Julia code, including building tensor network representations of quantum circuits 
- using ITensorNetworks and ITensor. 
+ using ITensorNetworks. 
  - `test`: is where test material will live. This is currently just a placeholder, as the existing test 
  material exists in `examples` folder with end-to-end example material. This `test` folder will be populated
  with unit test material in due course.
@@ -29,7 +29,7 @@ Once you have cloned the repository, you should be able to get started using the
  1. start your python env
  2. `pip install .`
  3. `python initial-setup.py`
- 4. `python examples/run_itn_heavy_hex.py` (similarly for other examples)
+ 4. `python examples/run_heavy_hex.py` (similarly for other examples)
 
 ## Contribution Guidelines
 
@@ -41,7 +41,7 @@ By participating, you are expected to uphold this code.
 
 ## Authors and Citation
 
-`ITensorNetworks Qiskit` was inspired, authored and brought about by the collective work of 
+`ITensorNetworksQiskit` was inspired, authored and brought about by the collective work of 
 [Kate Marshall](mailto:kate.marshall@ibm.com), [Lewis Anderson](mailto:lewis.anderson@ibm.com) and 
 [Ben Jaderberg](mailto:benjamin.jaderberg@ibm.com) working closely with 
 [Joey Tindall](mailto:jtindall@flatironinstitute.org). 
@@ -50,8 +50,8 @@ If you use this codebase for your research, please cite using the following BibT
 
 ```bibtex
 @software{itensornetworks_qiskit,
-  author = {{The ITensorNetworks Qiskit developers}},
-  title = {{ITensorNetworks Qiskit: Tools for running ITensorNetworks.jl and ITensors.jl quantum circuit simulations with Qiskit.}},
+  author = {{Lewis W. Anderson, Ben Jaderberg, Kate V. Marshall, Joseph Tindall}},
+  title = {{ITensorNetworksQiskit: Tools for running ITensorNetworks.jl simulations of Qiskit quantum circuits.}},
   url = {https://github.com/kvcmarshall6/ITensorNetworksQiskit}
 }
 ```

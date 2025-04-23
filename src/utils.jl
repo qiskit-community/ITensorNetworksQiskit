@@ -151,3 +151,11 @@ function filter_zero_terms(H::OpSum)
     end
     return H_out
 end
+
+function make_eigs_real(A::ITensor)
+  return map_eigvals(x -> real(x), A, first(inds(A)), last(inds(A)); ishermitian=true)
+end
+
+function make_eigs_positive(A::ITensor)
+  return map_eigvals(x -> abs(x), A, first(inds(A)), last(inds(A)); ishermitian=true)
+end
