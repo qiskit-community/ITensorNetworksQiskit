@@ -21,7 +21,7 @@ Setting to 0 (default) will not update the cache here, meaning it is only update
 `nlayers`. Setting to 1 will update the cache after every gate and give the lowest error from the
 BP approximation.
 """
-function tn_from_circuit(gates, chi, s, g, nlayers, bp_update_freq=0)
+function tn_from_circuit(gates, chi, s, nlayers, bp_update_freq=0)
     if startswith(gates, "[")
         gates = eval(Meta.parse(gates))
     end
@@ -37,11 +37,6 @@ function tn_from_circuit(gates, chi, s, g, nlayers, bp_update_freq=0)
         ),
     )
     bpc = build_bp_cache(ψ)
-    for gate in gates
-        println(gate[1])
-        println(length(gate))
-    end
-    println(gates)
     ψ, bpc = apply(gates, ψ, bpc; apply_kwargs, verbose = false)
     max_chi = maxlinkdim(ψ)
     println("Final chi: $max_chi")

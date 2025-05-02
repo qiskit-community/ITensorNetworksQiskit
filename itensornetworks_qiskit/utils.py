@@ -9,6 +9,7 @@ from qiskit.circuit import Qubit
 def jl_qubit_int_from_qiskit_qubit_obj(qubit: Qubit):
     return qubit._index + 1
 
+# TODO check if this needs updating to new format as 1 function below
 def qiskit_circ_to_itn_circ(qc: QuantumCircuit):
     gate_formats = {
         "u": lambda qubits, params: f'("Rn", [({qubits[0]}, 1)], (θ = {params[0]}, ϕ = {params[1]}, λ = {params[2]}))',
@@ -37,7 +38,7 @@ def qiskit_circ_to_itn_circ(qc: QuantumCircuit):
 
     return "[" + ", ".join(gates) + "]"
 
-
+# TODO update this docstring for the new format required by TensorNetworkQuantumSimulator
 # This is the same function as above but the gates are needed a different form. Instead of the
 # index listed as [({qubit}, 1)] it needs to be [({qubit}),].
 def qiskit_circ_to_itn_circ_2d(qc: QuantumCircuit):
@@ -67,7 +68,6 @@ def qiskit_circ_to_itn_circ_2d(qc: QuantumCircuit):
             raise ValueError(f"Unknown gate: {name}")
 
     return "[" + ", ".join(gates) + "]"
-
 
 # Again, this is very similar to the functions as above but the gates need to be a different form.
 # Instead of the index listed as [({qubit}, 1)] or [({qubit}),] it needs to be simply {qubit}

@@ -65,7 +65,7 @@ for _ in range(num_layers):
     # set the belief propagation cache to update after applying every gate for maximum accuracy
     bp_update_freq = 1
 
-    psi, bpc = jl.tn_from_circuit(itn_circ, chi, s, g, 1, bp_update_freq)
+    psi, bpc = jl.tn_from_circuit(itn_circ, chi, s, 1, bp_update_freq)
     t = datetime.now() - start_time
     print(t)
 
