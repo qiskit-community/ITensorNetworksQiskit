@@ -82,6 +82,30 @@ using ITensorNetworks:
     bond_tensors,
     gauge_error
 using ITensorNetworks.ITensorsExtensions: map_eigvals
+using TensorNetworkQuantumSimulator:
+    updatecache,
+    build_bp_cache,
+    vertices,
+    edges,
+    apply,
+    truncate,
+    get_global_bp_update_kwargs,
+    set_global_bp_update_kwargs!,
+    reset_global_bp_update_kwargs!,
+    get_global_boundarymps_update_kwargs,
+    set_global_boundarymps_update_kwargs!,
+    reset_global_boundarymps_update_kwargs!,
+    expect,
+    make_eigs_real,
+    build_boundarymps_cache,
+    truncate,
+    maxlinkdim,
+    siteinds,
+    edge_color,
+    zerostate,
+    getnqubits,
+    named_grid,
+    sample
 using ITensors: Op, prime, OpSum, apply
 using ITensors:
     ITensor,

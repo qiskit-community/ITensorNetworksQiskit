@@ -1,3 +1,6 @@
+using ITensorNetworks
+const ITN = ITensorNetworks
+
 # Adapted from main() in
 # https://github.com/JoeyT1994/ITensorNetworksExamples/examples/circuitHeavyHex.jl
 
@@ -17,33 +20,31 @@ be updated after each layer, which is a good strategy for Trotter circuits.
 Setting to 0 (default) will not update the cache here, meaning it is only updated through defining
 `nlayers`. Setting to 1 will update the cache after every gate and give the lowest error from the
 BP approximation.
-
 """
-function tn_from_circuit(gates, chi, s, nlayers, bp_update_freq=0)
+function tn_from_circuit(gates, chi, s, g, nlayers, bp_update_freq=0)
     if startswith(gates, "[")
         gates = eval(Meta.parse(gates))
     end
     ψ = ITensorNetwork(v -> "↑", s)
     maxdim, cutoff = chi, 1e-14
-    apply_kwargs = (; maxdim, cutoff)
+    apply_kwargs = (; maxdim, cutoff, normalize = true)
     #Parameters for BP, as the graph is not a tree (it has loops), we need to specify these
-    bp_update_kwargs = (; maxiter=25, tol=1e-8, message_update_kwargs = (; message_update_function = ms -> make_eigs_real.(default_message_update(ms))))
-    bpc = build_bp_cache(ψ; bp_update_kwargs...)
-
-    for i = 1:nlayers
-        println("Running circuit layer $i")
-        for (j, gate) in enumerate(gates)
-            o = gate_to_itensor(gate, s)
-            ψ, bpc = apply(o, ψ, bpc; reset_all_messages = false, apply_kwargs...)
-            if bp_update_freq > 0 && j % bp_update_freq == 0
-                bpc = update(bpc; bp_update_kwargs...)
-            end
-        end
-        #Update the BP cache after each layer here
-        bpc = update(bpc; bp_update_kwargs...)
-        max_chi = maxlinkdim(ψ)
-        println("Final chi: $max_chi")
+    set_global_bp_update_kwargs!(;
+        maxiter = 30,
+        tol = 1e-10,
+        message_update_kwargs = (;
+            message_update_function = ms -> make_eigs_real.(ITN.default_message_update(ms))
+        ),
+    )
+    bpc = build_bp_cache(ψ)
+    for gate in gates
+        println(gate[1])
+        println(length(gate))
     end
+    println(gates)
+    ψ, bpc = apply(gates, ψ, bpc; apply_kwargs, verbose = false)
+    max_chi = maxlinkdim(ψ)
+    println("Final chi: $max_chi")
 
 
     return ψ, bpc
