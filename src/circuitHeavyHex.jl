@@ -59,7 +59,6 @@ end
 ## TODO: generalise this to pass in a tuple of a pair which is known to be in the graph
 function get_first_edge_rdm_2d(ψ, bpc, g)
      first_edge = first(edges(g))
-     println("First edge is $first_edge")
      site1, site2 = src(first_edge), dst(first_edge)
      ρ = rdm(ψ, [site1, site2]; (cache!) = Ref(bpc))
      return ρ

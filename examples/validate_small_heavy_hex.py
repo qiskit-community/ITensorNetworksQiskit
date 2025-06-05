@@ -67,7 +67,7 @@ for _ in range(num_layers):
 
     psi, bpc = jl.tn_from_circuit(itn_circ, chi, s, 1, bp_update_freq)
     t = datetime.now() - start_time
-    print(t)
+    print("Time taken to simulate layer:", t)
 
     itn_overlap = jl.overlap_with_zero(psi, s)
     itn_eval = jl.sigmaz_expectation_2d(psi, list(range(1, 6)), bpc)
@@ -93,6 +93,8 @@ for _ in range(num_layers):
                                    concurrence(converted_qiskit_rdm),
                                    decimal=5)
 
+qc.draw(output="mpl", fold=-1, filename="validate_small_heavy_hex_circ.pdf")
+plt.close()
 plot_circuit_layout(qc, backend).show()
 plt.plot(range(1, num_layers + 1), itn_evals, "x", markersize=8)
 plt.gca().set_prop_cycle(None)
@@ -103,4 +105,4 @@ plt.plot([], [], "^", color="black", label='Qiskit statevector')
 plt.ylabel(r"$\langle \sigma^z \rangle$")
 plt.xlabel("Number of random circuit layers")
 plt.legend()
-plt.savefig("validate_small_heavy_hex.pdf")
+plt.savefig("validate_small_heavy_hex_sz.pdf")
