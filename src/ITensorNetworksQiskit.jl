@@ -17,7 +17,8 @@ export sq_overlap
 include("circuitHeavyHex.jl")
 export generate_graph
 export tn_from_circuit
-export sigmaz_expectation_2d
+export pauli_expectation
+export pauli_expectation_advanced
 export get_first_edge_rdm_2d
 
 end  # module ITensorNetworksQiskit

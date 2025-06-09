@@ -28,20 +28,11 @@ function tn_from_circuit(gates, chi, s, nlayers, bp_update_freq=0)
     ψ = ITensorNetwork(v -> "↑", s)
     maxdim, cutoff = chi, 1e-14
     apply_kwargs = (; maxdim, cutoff, normalize = true)
-    #Parameters for BP, as the graph is not a tree (it has loops), we need to specify these
-    set_global_bp_update_kwargs!(;
-        maxiter = 30,
-        tol = 1e-10,
-        message_update_kwargs = (;
-            message_update_function = ms -> make_eigs_real.(ITN.default_message_update(ms))
-        ),
-    )
+
     bpc = build_bp_cache(ψ)
-    ψ, bpc = apply(gates, ψ, bpc; apply_kwargs, verbose = false)
-    max_chi = maxlinkdim(ψ)
-    println("Final chi: $max_chi")
-
-
+    ψ, bpc, errors = apply(gates, ψ, bpc; apply_kwargs, verbose = false)
+    println("Max bond dimension: $(maxlinkdim(ψ))")
+    println("Maximum gate error for layer was $(maximum(errors))")
     return ψ, bpc
 end
 
@@ -51,9 +42,14 @@ function generate_graph(nx, ny)
     return g, nqubits
 end
 
-function sigmaz_expectation_2d(ψ, sites, bpc)
-    sites_tuples = [(n,) for n in sites]
-    expect_sigmaz = real.(expect(ψ, "Z", sites_tuples; (cache!)=Ref(bpc)))
+function pauli_expectation(pauli, ψ, sites, bpc)
+    observables = [(pauli, [n]) for n in sites]
+    expect_sigmaz = real.(expect(ψ, observables; (cache!)=Ref(bpc)))
+end
+
+function pauli_expectation_advanced(pauli, ψ, sites, boundarymps_rank)
+    observables = [(pauli, [n]) for n in sites]
+    expect_sigmaz = real.(expect(ψ, observables; alg="boundarymps", cache_construction_kwargs = (; message_rank = boundarymps_rank)))
 end
 
 ## TODO: generalise this to pass in a tuple of a pair which is known to be in the graph
