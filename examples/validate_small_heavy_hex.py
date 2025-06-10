@@ -70,7 +70,7 @@ for _ in range(num_layers):
     print("Time taken to simulate layer:", t)
 
     itn_overlap = jl.overlap_with_zero(psi, s)
-    itn_eval = jl.sigmaz_expectation_2d(psi, list(range(1, 6)), bpc)
+    itn_eval = jl.pauli_expectation("Z", psi, list(range(1, 6)), bpc)
     itn_evals.append(itn_eval)
 
     itn_rdm = jl.get_first_edge_rdm_2d(psi, bpc, g)

@@ -13,6 +13,8 @@ jl.seval("using ITensorNetworksQiskit")
 from qiskit import transpile
 from qiskit.circuit.random import random_circuit
 
+raise NotImplementedError("Running with MPS backend not supported in the latest version")
+
 n = 5
 cmap = [[j, j + 1] for j in range(n - 1)]
 qc = transpile(

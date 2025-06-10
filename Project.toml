@@ -18,6 +18,8 @@ Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
 SplitApplyCombine = "03a91e81-4c3e-53e1-a0a4-9c0c8f19dd66"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+TensorNetworkQuantumSimulator = "4de3b72a-362e-43dd-83ff-3f381eda9f9c"
+PythonCall = "6099a3de-0909-46bc-b1f4-468b9a2dfc0d"
 
 [compat]
 Dictionaries = "0.4.2"
@@ -27,6 +29,7 @@ ITensorNetworks = "0.13.3"
 ITensors = "0.9.1"
 NamedGraphs = "0.6.6"
 julia = "1.11"
+PythonCall = "=0.9.25"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
