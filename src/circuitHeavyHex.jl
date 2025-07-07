@@ -47,7 +47,12 @@ function pauli_expectation(pauli, ψ, sites, bpc)
     expect_sigmaz = real.(expect(ψ, observables; (cache!)=Ref(bpc)))
 end
 
-function pauli_expectation_advanced(pauli, ψ, sites, boundarymps_rank)
+function pauli_expectation_boundarymps(pauli, ψ, sites, boundarymps_rank)
+    """
+    Similar to pauli_expectation above, but allows the use of bounadry MPS too. As demonstrated
+    in
+    https://github.com/JoeyT1994/TensorNetworkQuantumSimulator/blob/main/examples/time-evolution.jl
+    """
     observables = [(pauli, [n]) for n in sites]
     expect_sigmaz = real.(expect(ψ, observables; alg="boundarymps", cache_construction_kwargs = (; message_rank = boundarymps_rank)))
 end

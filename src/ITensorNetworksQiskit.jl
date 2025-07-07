@@ -18,7 +18,7 @@ include("circuitHeavyHex.jl")
 export generate_graph
 export tn_from_circuit
 export pauli_expectation
-export pauli_expectation_advanced
+export pauli_expectation_boundarymps
 export get_first_edge_rdm_2d
 
 end  # module ITensorNetworksQiskit
