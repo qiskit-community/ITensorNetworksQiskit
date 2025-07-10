@@ -1,3 +1,6 @@
+using ITensorNetworks
+const ITN = ITensorNetworks
+
 # Adapted from main() in
 # https://github.com/JoeyT1994/ITensorNetworksExamples/examples/circuitHeavyHex.jl
 
@@ -17,7 +20,6 @@ be updated after each layer, which is a good strategy for Trotter circuits.
 Setting to 0 (default) will not update the cache here, meaning it is only updated through defining
 `nlayers`. Setting to 1 will update the cache after every gate and give the lowest error from the
 BP approximation.
-
 """
 function tn_from_circuit(gates, chi, s, nlayers, bp_update_freq=0)
     if startswith(gates, "[")
@@ -25,27 +27,12 @@ function tn_from_circuit(gates, chi, s, nlayers, bp_update_freq=0)
     end
     ψ = ITensorNetwork(v -> "↑", s)
     maxdim, cutoff = chi, 1e-14
-    apply_kwargs = (; maxdim, cutoff)
-    #Parameters for BP, as the graph is not a tree (it has loops), we need to specify these
-    bp_update_kwargs = (; maxiter=25, tol=1e-8, message_update_kwargs = (; message_update_function = ms -> make_eigs_real.(default_message_update(ms))))
-    bpc = build_bp_cache(ψ; bp_update_kwargs...)
+    apply_kwargs = (; maxdim, cutoff, normalize = true)
 
-    for i = 1:nlayers
-        println("Running circuit layer $i")
-        for (j, gate) in enumerate(gates)
-            o = gate_to_itensor(gate, s)
-            ψ, bpc = apply(o, ψ, bpc; reset_all_messages = false, apply_kwargs...)
-            if bp_update_freq > 0 && j % bp_update_freq == 0
-                bpc = update(bpc; bp_update_kwargs...)
-            end
-        end
-        #Update the BP cache after each layer here
-        bpc = update(bpc; bp_update_kwargs...)
-        max_chi = maxlinkdim(ψ)
-        println("Final chi: $max_chi")
-    end
-
-
+    bpc = build_bp_cache(ψ)
+    ψ, bpc, errors = apply(gates, ψ, bpc; apply_kwargs, verbose = false)
+    println("Max bond dimension: $(maxlinkdim(ψ))")
+    println("Maximum gate error for layer was $(maximum(errors))")
     return ψ, bpc
 end
 
@@ -55,9 +42,23 @@ function generate_graph(nx, ny)
     return g, nqubits
 end
 
-function sigmaz_expectation_2d(ψ, sites, bpc)
-    sites_tuples = [(n,) for n in sites]
-    expect_sigmaz = real.(expect(ψ, "Z", sites_tuples; (cache!)=Ref(bpc)))
+function pauli_expectation(pauli, ψ, sites, bpc)
+     """
+    Calculates the expectation value of a 1-body pauli observable "X", "Y", or "Z" for each
+    site in sites. Uses the default expectation algorithm, which is belief propagation.
+    """
+    observables = [(pauli, [n]) for n in sites]
+    expect_sigmaz = real.(expect(ψ, observables; (cache!)=Ref(bpc)))
+end
+
+function pauli_expectation_boundarymps(pauli, ψ, sites, boundarymps_rank)
+    """
+    Similar to pauli_expectation above, uses the boundary MPS method, which is more precise and
+    slower. See https://github.com/JoeyT1994/TensorNetworkQuantumSimulator/blob/22f8017e9798974bfe62f57afbc64ff9e239c246/src/expect.jl#L98
+    for more details.
+    """
+    observables = [(pauli, [n]) for n in sites]
+    expect_sigmaz = real.(expect(ψ, observables; alg="boundarymps", cache_construction_kwargs = (; message_rank = boundarymps_rank)))
 end
 
 ## TODO: generalise this to pass in a tuple of a pair which is known to be in the graph

@@ -1,48 +1,5 @@
-# Many of the functions here are adapted or copied from
+# Some of the functions here are adapted or copied from
 # https://github.com/JoeyT1994/ITensorNetworksExamples so that we have a stable versioned copy here
-
-function build_bp_cache(ψ::AbstractITensorNetwork; kwargs...)
-  bpc = BeliefPropagationCache(QuadraticFormNetwork(ψ))
-  bpc = update(bpc; kwargs...)
-  return bpc
-end
-
-function ITensors.apply(
-  o::ITensor,
-  ψ::AbstractITensorNetwork,
-  bpc::BeliefPropagationCache;
-  reset_all_messages=false,
-  apply_kwargs...,
-)
-  bpc = copy(bpc)
-  ψ = copy(ψ)
-  vs = neighbor_vertices(ψ, o)
-  envs = incoming_messages(bpc, PartitionVertex.(vs))
-  singular_values! = Ref(ITensor())
-  ψ = noprime(apply(o, ψ; envs, singular_values!, apply_kwargs...))
-  ψdag = prime(dag(ψ))
-  if length(vs) == 2
-    v1, v2 = vs
-    pe = partitionedge(bpc, (v1, "bra") => (v2, "bra"))
-    mts = messages(bpc)
-    ind2 = commonind(singular_values![], ψ[v1])
-    δuv = dag(copy(singular_values![]))
-    δuv = replaceind(δuv, ind2, ind2')
-    map_diag!(sign, δuv, δuv)
-    singular_values![] = denseblocks(singular_values![]) * denseblocks(δuv)
-    if !reset_all_messages
-      set!(mts, pe, dag.(ITensor[singular_values![]]))
-      set!(mts, reverse(pe), ITensor[singular_values![]])
-    else
-      bpc = BeliefPropagationCache(partitioned_tensornetwork(bpc))
-    end
-  end
-  for v in vs
-    bpc = update_factor(bpc, (v, "ket"), ψ[v])
-    bpc = update_factor(bpc, (v, "bra"), ψdag[v])
-  end
-  return ψ, bpc
-end
 
 function gate_to_itensor(gate, s::IndsNetwork)
     op_string = first(gate)
@@ -150,12 +107,4 @@ function filter_zero_terms(H::OpSum)
         end
     end
     return H_out
-end
-
-function make_eigs_real(A::ITensor)
-  return map_eigvals(x -> real(x), A, first(inds(A)), last(inds(A)); ishermitian=true)
-end
-
-function make_eigs_positive(A::ITensor)
-  return map_eigvals(x -> abs(x), A, first(inds(A)), last(inds(A)); ishermitian=true)
 end
