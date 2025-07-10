@@ -43,15 +43,19 @@ function generate_graph(nx, ny)
 end
 
 function pauli_expectation(pauli, ψ, sites, bpc)
+     """
+    Calculates the expectation value of a 1-body pauli observable "X", "Y", or "Z" for each
+    site in sites. Uses the default expectation algorithm, which is belief propagation.
+    """
     observables = [(pauli, [n]) for n in sites]
     expect_sigmaz = real.(expect(ψ, observables; (cache!)=Ref(bpc)))
 end
 
 function pauli_expectation_boundarymps(pauli, ψ, sites, boundarymps_rank)
     """
-    Similar to pauli_expectation above, but allows the use of bounadry MPS too. As demonstrated
-    in
-    https://github.com/JoeyT1994/TensorNetworkQuantumSimulator/blob/main/examples/time-evolution.jl
+    Similar to pauli_expectation above, uses the boundary MPS method, which is more precise and
+    slower. See https://github.com/JoeyT1994/TensorNetworkQuantumSimulator/blob/22f8017e9798974bfe62f57afbc64ff9e239c246/src/expect.jl#L98
+    for more details.
     """
     observables = [(pauli, [n]) for n in sites]
     expect_sigmaz = real.(expect(ψ, observables; alg="boundarymps", cache_construction_kwargs = (; message_rank = boundarymps_rank)))
