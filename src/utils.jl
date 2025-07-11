@@ -71,31 +71,31 @@ end
 
 #Construct a graph with edges everywhere a two-site gate appears.
 function build_graph_from_gates(gate_list)
-    vertices = []
-    edges = []
+    vertices_to_add = []
+    edges_to_add = []
     for gate in gate_list
         gate_verts = gate[2]
         if length(gate_verts) == 1
-            if only(gate_verts) ∉ vertices
-                push!(vertices, only(gate_verts))
+            if only(gate_verts) ∉ vertices_to_add
+                push!(vertices_to_add, only(gate_verts))
             end
         elseif length(gate_verts) == 2
             vsrc, vdst = gate_verts[1], gate_verts[2]
-            if vsrc ∉ vertices
-                push!(vertices, vsrc)
+            if vsrc ∉ vertices_to_add
+                push!(vertices_to_add, vsrc)
             end
-            if vdst ∉ vertices
-                push!(vertices, vdst)
+            if vdst ∉ vertices_to_add
+                push!(vertices_to_add, vdst)
             end
             e = NamedEdge(vsrc => vdst)
-            if e ∉ edges || reverse(e) ∉ edges
-                push!(edges, e)
+            if e ∉ edges_to_add || reverse(e) ∉ edges_to_add
+                push!(edges_to_add, e)
             end
         end
     end
     g = NamedGraph()
-    g = add_vertices(g, vertices)
-    g = add_edges(g, edges)
+    g = add_vertices(g, vertices_to_add)
+    g = add_edges(g, edges_to_add)
     return g
 end
 
