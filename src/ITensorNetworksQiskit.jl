@@ -14,6 +14,6 @@ export pauli_expectation_boundarymps
 export get_first_edge_rdm_2d
 
 include("sample.jl")
-export sample_itn
+export sample_psi
 
 end  # module ITensorNetworksQiskit

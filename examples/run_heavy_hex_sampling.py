@@ -67,16 +67,9 @@ t = datetime.now() - start_time
 print(t)
 
 print("***** ITN results *****")
-# itn_overlap = jl.overlap_with_zero(psi, s)
-# itn_eval = jl.pauli_expectation("Z", psi, [qmap[1], qmap[2]], bpc)
-# itn_rdm = jl.get_first_edge_rdm_2d(psi, bpc, g)
-# print(f"Overlap with zero state: {itn_overlap}")
-# print(f"σz expectation value of sites 1 and 2: {itn_eval}")
-# print(f"2-qubit RDM of sites of first edge: {itn_rdm}")
-
 print(f"Sampling from circuit")
 
 shots = 100
-print(jl.sample_itn(psi, shots))
+print(jl.sample_psi(psi, shots))
 
 print("\n")

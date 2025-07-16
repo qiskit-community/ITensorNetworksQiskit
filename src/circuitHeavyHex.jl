@@ -35,6 +35,12 @@ function generate_graph(nx, ny)
     return g, nqubits
 end
 
+function overlap_with_zero(ψ, s)
+    ψref = ITensorNetwork(v -> "↑", s)
+    f = sq_overlap(ψ, ψref)
+    return f
+end
+
 function pauli_expectation(pauli, ψ, sites, bpc)
      """
     Calculates the expectation value of a 1-body pauli observable "X", "Y", or "Z" for each
