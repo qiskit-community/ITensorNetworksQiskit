@@ -10,6 +10,12 @@ const ITN = ITensorNetworks
 Returns an ITensorNetwork corresponding to the action of the gates on the |00..0> state. See the
 /examples/ directory for examples of usage.
 
+Belief propagation uses the default convergence settings defined in
+https://github.com/JoeyT1994/TensorNetworkQuantumSimulator/blob/main/src/Backend/beliefpropagation.jl.
+Furthermore, the belief propagation cache is updated every time an overlapping gate is encountered
+(i.e., every time the two-qubit circuit depth increases), the default behaviour in
+TensorNetworkQuantumSimulator.
+
 # Arguments
 - `gates`: Gates in the format returned by `qiskit_circ_to_itn_circ_2d()`
 - `chi`: Maximum bond dimension for the simulatin

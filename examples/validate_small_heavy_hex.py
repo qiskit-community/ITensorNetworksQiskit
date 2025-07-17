@@ -16,7 +16,7 @@ from qiskit.transpiler import CouplingMap
 from qiskit.visualization import plot_circuit_layout
 
 from itensornetworks_qiskit.utils import (
-    qiskit_circ_to_itn_circ_2d, prepare_graph_for_itn,
+    qiskit_circ_to_itn_circ_2d, extract_cx_gates,
 )
 
 jl.seval("using ITensorNetworksQiskit")
@@ -54,7 +54,7 @@ for _ in range(num_layers):
     itn_circ = qiskit_circ_to_itn_circ_2d(qc)
 
     # build ITN graph from Qiskit
-    graph_string = prepare_graph_for_itn(itn_circ)
+    graph_string = extract_cx_gates(itn_circ)
     g = jl.build_graph_from_gates(jl.seval(graph_string))
 
     # derive site indices list and other params from graph
@@ -62,10 +62,7 @@ for _ in range(num_layers):
     chi = 50
     start_time = datetime.now()
 
-    # set the belief propagation cache to update after applying every gate for maximum accuracy
-    bp_update_freq = 1
-
-    psi, bpc = jl.tn_from_circuit(itn_circ, chi, s, 1, bp_update_freq)
+    psi, bpc = jl.tn_from_circuit(itn_circ, chi, s)
     t = datetime.now() - start_time
     print("Time taken to simulate layer:", t)
 

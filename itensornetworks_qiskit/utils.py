@@ -83,7 +83,7 @@ def extract_itn_graph(g):
     return edges_tuples
 
 
-def prepare_graph_for_itn(itn_circ: str):
+def extract_cx_gates(itn_circ: str):
     pattern = r'("CX", \[.*?\])'
     cx_terms = re.findall(pattern, itn_circ)
     modified_cx_terms = ["(" + term + ")" for term in cx_terms]

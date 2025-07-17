@@ -11,7 +11,7 @@ from qiskit.transpiler import CouplingMap
 from qiskit.visualization import plot_circuit_layout
 
 from itensornetworks_qiskit.utils import (
-    qiskit_circ_to_itn_circ_2d, prepare_graph_for_itn,
+    qiskit_circ_to_itn_circ_2d, extract_cx_gates,
 )
 
 jl.seval("using ITensorNetworksQiskit")
@@ -33,7 +33,7 @@ jzz = 1.0
 qc = QuantumCircuit(115)
 qc.x(range(115)[::2])
 
-
+# Apply using very naive edge colouring
 def trotter_step(qc):
     for edge in graph:
         if edge[0] % 2 == 0:
@@ -65,7 +65,7 @@ qc = transpile(qc, basis_gates=["rx", "ry", "rz", "cx"], optimization_level=3, b
 itn_circ = qiskit_circ_to_itn_circ_2d(qc)
 
 # build ITN graph from the Qiskit circuit
-graph_string = prepare_graph_for_itn(itn_circ)
+graph_string = extract_cx_gates(itn_circ)
 g = jl.build_graph_from_gates(jl.seval(graph_string))
 
 s = jl.siteinds("S=1/2", g)
@@ -74,13 +74,9 @@ s = jl.siteinds("S=1/2", g)
 chi = 100
 start_time = datetime.now()
 
-# Here we define only 1 layer since the circuit is not entirely a repeated structure (due to bit
-# flip state preparation)
-n_layers = 1
-
 # run simulation
 # extract output MPS and belief propagation cache (bpc)
-psi, bpc = jl.tn_from_circuit(itn_circ, chi, s, n_layers)
+psi, bpc = jl.tn_from_circuit(itn_circ, chi, s)
 t = datetime.now() - start_time
 print(t)
 

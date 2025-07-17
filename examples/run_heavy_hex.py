@@ -12,7 +12,7 @@ from qiskit.transpiler import CouplingMap
 from qiskit.visualization import plot_circuit_layout
 
 from itensornetworks_qiskit.utils import (
-    qiskit_circ_to_itn_circ_2d, prepare_graph_for_itn,
+    qiskit_circ_to_itn_circ_2d, extract_cx_gates,
 )
 
 jl.seval("using ITensorNetworksQiskit")
@@ -28,12 +28,14 @@ graph = backend.coupling_map.get_edges()
 graph = [list(s) for s in set([frozenset(item) for item in graph])]
 
 qc = QuantumCircuit(backend.num_qubits)
-for edge in graph:
-    qc.h(edge[0])
-    qc.h(edge[1])
-    qc.cx(edge[0], edge[1])
-    qc.ry(random.random() * np.pi, edge[0])
-    qc.ry(random.random() * np.pi, edge[1])
+num_layers = 10
+for i in range(num_layers):
+    for edge in graph:
+        qc.h(edge[0])
+        qc.h(edge[1])
+        qc.cx(edge[0], edge[1])
+        qc.ry(random.random() * np.pi, edge[0])
+        qc.ry(random.random() * np.pi, edge[1])
 
 qc = transpile(qc, basis_gates=["rx", "ry", "rz", "cx"], backend=backend)
 plot_circuit_layout(qc, backend).show()
@@ -42,7 +44,7 @@ plot_circuit_layout(qc, backend).show()
 itn_circ = qiskit_circ_to_itn_circ_2d(qc)
 
 # build ITN graph from the Qiskit circuit
-graph_string = prepare_graph_for_itn(itn_circ)
+graph_string = extract_cx_gates(itn_circ)
 g = jl.build_graph_from_gates(jl.seval(graph_string))
 s = jl.siteinds("S=1/2", g)
 
@@ -50,13 +52,9 @@ s = jl.siteinds("S=1/2", g)
 chi = 50
 start_time = datetime.now()
 
-# If a circuit has a repeated structure, we can define how many layers of it here. The belief
-# propagation cache will be updated after every layer
-n_layers = 10
-
 # run simulation
 # extract output MPS and belief propagation cache (bpc)
-psi, bpc = jl.tn_from_circuit(itn_circ, chi, s, n_layers)
+psi, bpc = jl.tn_from_circuit(itn_circ, chi, s)
 t = datetime.now() - start_time
 print(t)
 
