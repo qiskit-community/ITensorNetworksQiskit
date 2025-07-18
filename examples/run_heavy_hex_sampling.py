@@ -1,5 +1,5 @@
-"""Example building a large heavy-hex circuit with 10 repeated layers of random gates,
-generating the tensor network representation using ITN and then computing observables"""
+"""Example building a large heavy-hex circuit with 3 repeated layers of random gates,
+generating the tensor network representation using ITN and then sampling bitstrings"""
 
 import random
 from datetime import datetime
@@ -65,7 +65,7 @@ start_time = datetime.now()
 psi, bpc = jl.tn_from_circuit(itn_circ, chi, s)
 
 print(f"Sampling from circuit")
-num_shots = 100
+num_shots = 10
 itn_shots = jl.sample_psi(psi, num_shots)
 
 t = datetime.now() - start_time
