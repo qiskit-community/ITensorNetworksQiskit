@@ -11,9 +11,8 @@ from qiskit.providers.fake_provider import GenericBackendV2
 from qiskit.transpiler import CouplingMap
 from qiskit.visualization import plot_circuit_layout
 
-from itensornetworks_qiskit.utils import (
-    qiskit_circ_to_itn_circ_2d, extract_cx_gates,
-)
+from itensornetworks_qiskit.graph import extract_cx_gates
+from itensornetworks_qiskit.utils import qiskit_circ_to_itn_circ_2d
 
 jl.seval("using ITensorNetworksQiskit")
 
@@ -28,7 +27,7 @@ graph = backend.coupling_map.get_edges()
 graph = [list(s) for s in set([frozenset(item) for item in graph])]
 
 qc = QuantumCircuit(backend.num_qubits)
-num_layers = 10
+num_layers = 5
 for i in range(num_layers):
     for edge in graph:
         qc.h(edge[0])
@@ -54,7 +53,9 @@ start_time = datetime.now()
 
 # run simulation
 # extract output MPS and belief propagation cache (bpc)
-psi, bpc = jl.tn_from_circuit(itn_circ, chi, s)
+psi, bpc, errors = jl.tn_from_circuit(itn_circ, chi, s)
+print("Estimated final state fidelity:", np.prod(1 - np.array(errors)))
+
 t = datetime.now() - start_time
 print(t)
 

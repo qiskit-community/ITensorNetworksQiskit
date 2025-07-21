@@ -15,9 +15,8 @@ from qiskit.quantum_info import partial_trace, Statevector, concurrence, Density
 from qiskit.transpiler import CouplingMap
 from qiskit.visualization import plot_circuit_layout
 
-from itensornetworks_qiskit.utils import (
-    qiskit_circ_to_itn_circ_2d, extract_cx_gates,
-)
+from itensornetworks_qiskit.graph import extract_cx_gates
+from itensornetworks_qiskit.utils import qiskit_circ_to_itn_circ_2d
 
 jl.seval("using ITensorNetworksQiskit")
 
@@ -62,7 +61,8 @@ for _ in range(num_layers):
     chi = 50
     start_time = datetime.now()
 
-    psi, bpc = jl.tn_from_circuit(itn_circ, chi, s)
+    psi, bpc, errors = jl.tn_from_circuit(itn_circ, chi, s)
+    print("Estimated final state fidelity:", np.prod(1 - np.array(errors)))
     t = datetime.now() - start_time
     print("Time taken to simulate layer:", t)
 

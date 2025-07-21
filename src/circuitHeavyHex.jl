@@ -32,7 +32,7 @@ function tn_from_circuit(gates, chi, s)
     ψ, bpc, errors = apply(gates, ψ, bpc; apply_kwargs)
     println("Max bond dimension: $(maxlinkdim(ψ))")
     println("Maximum gate error for layer was $(maximum(errors))")
-    return ψ, bpc
+    return ψ, bpc, errors
 end
 
 function generate_graph(nx, ny)

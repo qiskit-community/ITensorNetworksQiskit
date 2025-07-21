@@ -9,11 +9,10 @@ from juliacall import Main as jl
 from qiskit import transpile, QuantumCircuit
 from qiskit_ibm_runtime.fake_provider import FakeSherbrooke
 
+from itensornetworks_qiskit.graph import extract_cx_gates
 from itensornetworks_qiskit.ibm_device_map import ibm_qubit_layout
 from itensornetworks_qiskit.sample import itn_samples_to_counts_dict
-from itensornetworks_qiskit.utils import (
-    qiskit_circ_to_itn_circ_2d, extract_cx_gates,
-)
+from itensornetworks_qiskit.utils import qiskit_circ_to_itn_circ_2d
 
 jl.seval("using ITensorNetworksQiskit")
 
@@ -62,11 +61,12 @@ start_time = datetime.now()
 
 # run simulation
 # extract output MPS and belief propagation cache (bpc)
-psi, bpc = jl.tn_from_circuit(itn_circ, chi, s)
+psi, bpc, errors = jl.tn_from_circuit(itn_circ, chi, s)
+print("Estimated final state fidelity:", np.prod(1 - np.array(errors)))
 
 print(f"Sampling from circuit")
 num_shots = 10
-itn_shots = jl.sample_psi(psi, num_shots)
+itn_shots = jl.sample_psi(psi, num_shots, 5, 5)
 
 t = datetime.now() - start_time
 print(f"Simulation and sampling completed in {t}")
