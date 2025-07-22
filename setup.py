@@ -18,7 +18,7 @@ setup(
         "juliacall",
         "matplotlib~=3.9.0",
         "pylatexenc~=2.10",
-        "networkx~=3.4.2"
+        "networkx~=3.4.2",
         "qiskit-ibm-runtime~=0.40.1"
     ],
 )
