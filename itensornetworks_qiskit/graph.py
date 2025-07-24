@@ -42,7 +42,7 @@ def cmap_from_circuit(qc: QuantumCircuit):
 
 def map_onto_2d_grid(edges, num_x=10, num_y=10):
     """
-    Lay out a planar (likely heavy‑hex) graph on an integer 2D grid.
+    Lay out a planar graph on an integer 2D grid.
 
     Parameters
     ----------
@@ -58,7 +58,7 @@ def map_onto_2d_grid(edges, num_x=10, num_y=10):
         Mapping {original vertex label → (x_int, y_int)}.
     """
     edges_tuple = tuple(tuple(pair) for pair in edges)
-    if mapping_cache[edges_tuple] is not None:
+    if mapping_cache.get(edges_tuple) is not None:
         return mapping_cache[edges_tuple]
     g = nx.Graph(edges)
     square_g = nx.grid_2d_graph(num_x, num_y)
