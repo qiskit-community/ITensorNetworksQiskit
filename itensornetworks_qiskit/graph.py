@@ -6,21 +6,6 @@ import networkx as nx
 from networkx.algorithms.isomorphism import GraphMatcher
 from qiskit import QuantumCircuit
 
-
-def extract_itn_graph(g):
-    output_capture = io.StringIO()
-    sys.stdout = output_capture
-    print(g)
-    sys.stdout = sys.__stdout__
-    julia_output = output_capture.getvalue()
-    output_capture.close()
-    edges_str = julia_output.split(" edge(s):")[1].strip()
-    edge_pattern = re.compile(r"\((\d+),\) => \((\d+),\)")
-    edges = edge_pattern.findall(edges_str)
-    edges_tuples = [(int(x) - 1, int(y) - 1) for x, y in edges]
-    return edges_tuples
-
-
 def extract_cx_gates(itn_circ: str):
     pattern = r'("CX", \[.*?\])'
     cx_terms = re.findall(pattern, itn_circ)
@@ -40,18 +25,15 @@ def cmap_from_circuit(qc: QuantumCircuit):
     return unique_edges
 
 
-def map_onto_2d_grid(edges, num_x=10, num_y=10):
+def map_onto_2d_grid(edges: list[list[int]], num_x: int = 10, num_y: int = 10):
     """
     Lay out a planar graph on an integer 2D grid.
 
     Parameters
     ----------
-    edges : list[list[int]]
-        Undirected edge list, e.g. [[0, 1], [1, 2], … ].
-    num_x : int
-        Number of rows in the grid
-    num_y : int
-        Number of columns in the grid
+    edges : Undirected edge list, e.g. [[0, 1], [1, 2], … ].
+    num_x : Number of rows in the grid
+    num_y : Number of columns in the grid
     Returns
     -------
     dict[int, tuple[int, int]]

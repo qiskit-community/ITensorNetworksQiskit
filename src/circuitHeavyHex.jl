@@ -41,11 +41,6 @@ function generate_graph(nx, ny)
     return g, nqubits
 end
 
-function overlap_with_zero(ψ, s)
-    ψref = ITensorNetwork(v -> "↑", s)
-    f = sq_overlap(ψ, ψref)
-    return f
-end
 
 function pauli_expectation(pauli, ψ, sites, bpc)
      """

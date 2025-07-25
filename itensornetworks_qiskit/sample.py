@@ -5,38 +5,28 @@ from collections import Counter
 def parse_samples(shots):
     """
     Parse a JuliaCall object like
-      Dictionaries.Dictionary{Tuple{Int64, Int64}, Int64}[{(1, 1) = 1, …}, {…}, …]
-    into a Python list of dicts: [{(1,1):1, …}, {…}, …] via the string representation.
+      Dictionaries.Dictionary{Tuple{Int64, Int64}, Int64}[{(1, 1) = 1, (2, 1) = 1, ...}, {…}, …]
+    into a Python list of dicts [{(1,1):1, …}, {…}, …] via the string representation.
     # TODO Can we find a way to directly convert this using JuliaCall without strings and regex?
     """
     shots_str = str(shots)
-    # Extract the characters between the first and last square bracket
-    m = re.search(r'\[([\s\S]*)]$', shots_str)
-    if not m:
-        raise ValueError("Unexpected format: no top-level brackets found")
-    inner = m.group(1)
+    # Remove outer square brackets
+    inner = shots_str[1:-1]
 
-    # Split into each individual shot
-    dict_strs = []
-    buf = ""
-    level = 0
-    for ch in inner:
-        if ch == "{":
-            level += 1
-        if level > 0:
-            buf += ch
-        if ch == "}":
-            level -= 1
-            if level == 0:
-                dict_strs.append(buf)
-                buf = ""
+    # Separate each shot into its own string by capturing all characters between and incl { and }
+    dict_strs = re.findall(r'\{[^}]*}', inner)
 
     # For each shot, pull out all "(qnx, qny) = b" pairs where (q1x, q1y) are the 2d coordinates
     # on the heavy hex for qubit n and b is a single bit value 0 or 1.
     out = []
     for ds in dict_strs:
         body = ds[1:-1]  # strip the outer {…}
-        pairs = re.findall(r'\(\s*(\d+)\s*,\s*(\d+)\s*\)\s*=\s*(\d+)', body)
+        print(body)
+        # In each shot we have the form "(qnx, qny) = b". First we look for a "(" character and
+        # capture the digit qnx. Then after a comma and possible whitespace we capture qny. We then
+        # look for ")" to know vertices are ended. Finally, after "=" and possible whitespaces
+        # we capture the final digit which is the bit value 0 or 1.
+        pairs = re.findall(r'\(*(\d+)*,\s*(\d+)*\)\s*=\s*(\d+)', body)
         d = {(int(i), int(j)): int(v) for i, j, v in pairs}
         out.append(d)
 

@@ -15,6 +15,12 @@ function sq_overlap(ψ::ITensorNetwork, ϕ::ITensorNetwork; normalized = false, 
     return real(numerator / denominator)
 end
 
+function overlap_with_zero(ψ, s)
+    ψref = ITensorNetwork(v -> "↑", s)
+    f = sq_overlap(ψ, ψref)
+    return f
+end
+
 #Note that region should consist of contiguous vertices here!
 function rdm(ψ::ITensorNetwork, region; (cache!)=nothing, cache_update_kwargs=(;))
   cache = isnothing(cache!) ? build_bp_cache(ψ; cache_update_kwargs...) : cache![]
