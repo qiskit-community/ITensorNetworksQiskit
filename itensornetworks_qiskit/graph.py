@@ -28,16 +28,9 @@ def cmap_from_circuit(qc: QuantumCircuit):
 def map_onto_2d_grid(edges: list[list[int]], num_x: int = 10, num_y: int = 10):
     """
     Lay out a planar graph on an integer 2D grid.
-
-    Parameters
-    ----------
-    edges : Undirected edge list, e.g. [[0, 1], [1, 2], … ].
-    num_x : Number of rows in the grid
-    num_y : Number of columns in the grid
-    Returns
-    -------
-    dict[int, tuple[int, int]]
-        Mapping {original vertex label → (x_int, y_int)}.
+    :param edges: Undirected edge list, e.g. [[0, 1], [1, 2], … ].
+    :param num_x: Number of rows in the grid
+    :param num_y: Number of columns in the grid
     """
     g = nx.Graph(edges)
     square_g = nx.grid_2d_graph(num_x, num_y)
