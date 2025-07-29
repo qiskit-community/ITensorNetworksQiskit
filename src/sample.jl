@@ -11,5 +11,5 @@ function
 """
 function sample_psi(ψt, nsamples, projected_message_rank=maxlinkdim(ψt)*5, norm_message_rank=maxlinkdim(ψt)^2, partition_by="Column")
      return TNQS.sample(ψt, nsamples; projected_message_rank=projected_message_rank,
-                norm_message_rank=norm_message_rank, partition_by="Column")
+                norm_message_rank=norm_message_rank, partition_by=partition_by)
 end

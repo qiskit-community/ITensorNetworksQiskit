@@ -1,10 +1,9 @@
-import io
 import re
-import sys
 
 import networkx as nx
 from networkx.algorithms.isomorphism import GraphMatcher
 from qiskit import QuantumCircuit
+
 
 def extract_cx_gates(itn_circ: str):
     pattern = r'("CX", \[.*?\])'

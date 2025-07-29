@@ -21,7 +21,6 @@ def parse_samples(shots):
     out = []
     for ds in dict_strs:
         body = ds[1:-1]  # strip the outer {…}
-        print(body)
         # In each shot we have the form "(qnx, qny) = b". First we look for a "(" character and
         # capture the digit qnx. Then after a comma and possible whitespace we capture qny. We then
         # look for ")" to know vertices are ended. Finally, after "=" and possible whitespaces
@@ -31,6 +30,7 @@ def parse_samples(shots):
         out.append(d)
 
     return out
+
 
 def sample_dict_to_bitstring(sample_dict, qmap_inv):
     """
@@ -42,8 +42,9 @@ def sample_dict_to_bitstring(sample_dict, qmap_inv):
     bits = ["0"] * len(sample_dict)
     for qubit_coord, bit in sample_dict.items():
         if bit:
-            bits[qmap_inv[qubit_coord]-1] = "1"
+            bits[qmap_inv[qubit_coord] - 1] = "1"
     return ("".join(reversed(bits)))
+
 
 def itn_samples_to_counts_dict(shots, qmap: dict):
     """
