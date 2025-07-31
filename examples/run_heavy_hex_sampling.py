@@ -59,7 +59,8 @@ s = jl.siteinds("S=1/2", g)
 chi = 50
 start_time = datetime.now()
 
-# run simulation
+# run simulation: Note obtaining the state and sampling takes ~2 minutes to run
+
 # extract output MPS and belief propagation cache (bpc)
 psi, bpc, errors = jl.tn_from_circuit(itn_circ, chi, s)
 print("Estimated final state fidelity:", np.prod(1 - np.array(errors)))
