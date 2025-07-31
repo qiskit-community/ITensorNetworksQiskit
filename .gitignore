@@ -12,6 +12,7 @@
 *.pdf
 *.png
 .idea
+*.pkl
 
 ### macOS ###
 # General
