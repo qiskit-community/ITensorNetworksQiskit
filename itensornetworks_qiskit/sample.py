@@ -12,7 +12,7 @@ def parse_samples(shots):
     # Create a string of entire Julia obj e.g., "Dictionaries.Dictionary{Tuple{...."
     shots_str = str(shots)
     # Separate each shot into its own string by capturing all characters between and incl { and }
-    dict_strs = re.findall(r'\{[^}]*\}', shots_str)
+    dict_strs = re.findall(r'\{[^}]*}', shots_str)
 
     # The Julia type gets caught by our regex above, remove it
     if "Tuple" in dict_strs[0]:
