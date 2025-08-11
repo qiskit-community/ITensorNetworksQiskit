@@ -9,12 +9,14 @@ def parse_samples(shots):
     into a Python list of dicts [{(1,1):1, …}, {…}, …] via the string representation.
     # TODO Can we find a way to directly convert this using JuliaCall without strings and regex?
     """
+    # Create a string of entire Julia obj e.g., "Dictionaries.Dictionary{Tuple{...."
     shots_str = str(shots)
-    # Remove outer square brackets
-    inner = shots_str[1:-1]
-
     # Separate each shot into its own string by capturing all characters between and incl { and }
-    dict_strs = re.findall(r'\{[^}]*}', inner)
+    dict_strs = re.findall(r'\{[^}]*\}', shots_str)
+
+    # The Julia type gets caught by our regex above, remove it
+    if "Tuple" in dict_strs[0]:
+        del dict_strs[0]
 
     # For each shot, pull out all "(qnx, qny) = b" pairs where (q1x, q1y) are the 2d coordinates
     # on the heavy hex for qubit n and b is a single bit value 0 or 1.
