@@ -19,7 +19,12 @@ def cmap_from_circuit(qc: QuantumCircuit):
         if len(gate.qubits) >= 3:
             raise NotImplemented("Please transpile to only 1 and 2 qubit gates")
         if len(gate.qubits) == 2:
-            edges.append([gate.qubits[0]._index, gate.qubits[1]._index])
+            q0 = gate.qubits[0]
+            q1 = gate.qubits[1]
+            qubit_pair = [q0._index, q1._index]
+            if qubit_pair == [None, None]:
+                qubit_pair = [qc.layout.initial_layout[q0], qc.layout.initial_layout[q1]]
+            edges.append(qubit_pair)
     unique_edges = [list(s) for s in set([frozenset(item) for item in edges])]
     return unique_edges
 
