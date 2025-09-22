@@ -52,15 +52,8 @@ The structure of this repository as follows:
 [Ben Jaderberg](mailto:benjamin.jaderberg@ibm.com) and
 [Joey Tindall](mailto:jtindall@flatironinstitute.org). 
 
-If you use this codebase for your research, please cite using the following BibTeX:
-
-```bibtex
-@software{itensornetworks_qiskit,
-  author = {{Lewis W. Anderson, Ben Jaderberg, Kate V. Marshall, Joseph Tindall}},
-  title = {{ITensorNetworksQiskit: Tools for running ITensorNetworks.jl simulations of Qiskit quantum circuits.}},
-  url = {https://github.com/kvcmarshall6/ITensorNetworksQiskit}
-}
-```
+If you use this codebase for your research, please cite the latest version from Zenodo:
+https://zenodo.org/records/16926969.
 
 ## License
 
