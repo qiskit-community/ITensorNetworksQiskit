@@ -29,7 +29,7 @@ ITensorNetworks = "0.13.3"
 ITensors = "0.9.1"
 NamedGraphs = "0.6.6"
 julia = "1.11"
-PythonCall = "=0.9.27"
+PythonCall = "=0.9.28"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"

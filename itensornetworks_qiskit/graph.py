@@ -29,13 +29,15 @@ def cmap_from_circuit(qc: QuantumCircuit):
     return unique_edges
 
 
-def map_onto_2d_grid(edges: list[list[int]], num_x: int = 10, num_y: int = 10):
+def map_onto_2d_grid(edges: list[list[int]] | list[tuple[int]], num_x: int = 10, num_y: int = 10):
     """
     Lay out a planar graph on an integer 2D grid.
     :param edges: Undirected edge list, e.g. [[0, 1], [1, 2], … ].
     :param num_x: Number of rows in the grid
     :param num_y: Number of columns in the grid
     """
+    if isinstance(edges[0], tuple):
+        edges = [list(e) for e in edges]
     g = nx.Graph(edges)
     square_g = nx.grid_2d_graph(num_x, num_y)
     matcher = GraphMatcher(square_g, g)

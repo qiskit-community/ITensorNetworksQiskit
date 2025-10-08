@@ -21,7 +21,7 @@ from itensornetworks_qiskit.utils import qiskit_circ_to_itn_circ_2d
 jl.seval("using ITensorNetworksQiskit")
 
 # Any Julia functions from outside our package should be added here
-jl.seval("using ITensorNetworks: siteinds")
+jl.seval("using ITensorNetworks: siteinds, maxlinkdim")
 
 cmap = CouplingMap().from_heavy_hex(3)
 print(f"Created heavy-hex graph with {cmap.size()} qubits")
@@ -62,6 +62,7 @@ for _ in range(num_layers):
     start_time = datetime.now()
 
     psi, bpc, errors = jl.tn_from_circuit(itn_circ, chi, s)
+    print("Maximum bond dimension", jl.maxlinkdim(psi))
     print("Estimated final state fidelity:", np.prod(1 - np.array(errors)))
     t = datetime.now() - start_time
     print("Time taken to simulate layer:", t)

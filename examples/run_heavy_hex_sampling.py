@@ -17,7 +17,7 @@ from itensornetworks_qiskit.utils import qiskit_circ_to_itn_circ_2d
 jl.seval("using ITensorNetworksQiskit")
 
 # Any Julia functions from outside our package should be added here
-jl.seval("using ITensorNetworks: siteinds")
+jl.seval("using ITensorNetworks: siteinds, maxlinkdim")
 
 # Note here we use a real device graph, which is subtly different from CouplingMap().from_heavy_hex
 # used in other examples. Any connectivity can be used if a map can be provided between qubit
@@ -63,6 +63,7 @@ start_time = datetime.now()
 
 # extract output MPS and belief propagation cache (bpc)
 psi, bpc, errors = jl.tn_from_circuit(itn_circ, chi, s)
+print("Maximum bond dimension", jl.maxlinkdim(psi))
 print("Estimated final state fidelity:", np.prod(1 - np.array(errors)))
 
 print(f"Sampling from circuit")

@@ -63,6 +63,8 @@ def qiskit_circ_to_itn_circ_2d(qc: QuantumCircuit, qmap: dict = None):
 
         if name in gate_formats:
             gates.append(gate_formats[name](qubits, params))
+        elif name in ["barrier", "measure"]:
+            pass
         else:
             raise ValueError(f"Unknown gate: {name}")
 
