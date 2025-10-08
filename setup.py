@@ -6,7 +6,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="ITensorNetworksQiskit",
-    version="0.0",
+    version="1.0.0",
     description="ITensorNetworksQiskit",
     author="Kate Marshall, Lewis Anderson, Ben Jaderberg, Joey Tindall",
     author_email="kate.marshall@ibm.com, lewis.anderson@ibm.com, benjamin.jaderberg@ibm.com, jtindall@flatironinstitute.org",
