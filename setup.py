@@ -14,7 +14,7 @@ setup(
     packages=find_packages(),
     zip_safe=False,
     install_requires=[
-        "qiskit>=1.3,~2.1.1",
+        "qiskit~=2.1",
         "juliacall",
         "matplotlib~=3.9.0",
         "pylatexenc~=2.10",
