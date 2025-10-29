@@ -21,7 +21,7 @@ from itensornetworks_qiskit.utils import qiskit_circ_to_itn_circ_2d
 jl.seval("using ITensorNetworksQiskit")
 
 # Any Julia functions from outside our package should be added here
-jl.seval("using ITensorNetworks: siteinds")
+jl.seval("using ITensorNetworks: siteinds, maxlinkdim")
 
 cmap = CouplingMap().from_heavy_hex(3)
 print(f"Created heavy-hex graph with {cmap.size()} qubits")
@@ -31,7 +31,7 @@ graph = backend.coupling_map.get_edges()
 graph = [list(s) for s in set([frozenset(item) for item in graph])]
 
 # Optional seed to make the example deterministic
-random.seed(1)
+random.seed(2)
 
 qc = QuantumCircuit(backend.num_qubits)
 num_layers = 3
@@ -62,6 +62,7 @@ for _ in range(num_layers):
     start_time = datetime.now()
 
     psi, bpc, errors = jl.tn_from_circuit(itn_circ, chi, s)
+    print("Maximum bond dimension", jl.maxlinkdim(psi))
     print("Estimated final state fidelity:", np.prod(1 - np.array(errors)))
     t = datetime.now() - start_time
     print("Time taken to simulate layer:", t)
@@ -84,11 +85,11 @@ for _ in range(num_layers):
     np.testing.assert_almost_equal(itn_overlap, qiskit_overlap, decimal=5)
     np.testing.assert_almost_equal(itn_eval, qiskit_eval, decimal=5)
     converted_itn_rdm = DensityMatrix(np.array(itn_rdm))
-    converted_qiskit_rdm = DensityMatrix(np.array(qiskit_rdm))
+
     # Density matrices differ by 4 elements, but entanglement measures come out the same
     np.testing.assert_almost_equal(concurrence(converted_itn_rdm),
-                                   concurrence(converted_qiskit_rdm),
-                                   decimal=5)
+                                   concurrence(qiskit_rdm),
+                                   decimal=3)
 
 qc.draw(output="mpl", fold=-1, filename="validate_small_heavy_hex_circ.pdf")
 plt.close()

@@ -6,7 +6,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="ITensorNetworksQiskit",
-    version="0.0",
+    version="1.0.0",
     description="ITensorNetworksQiskit",
     author="Kate Marshall, Lewis Anderson, Ben Jaderberg, Joey Tindall",
     author_email="kate.marshall@ibm.com, lewis.anderson@ibm.com, benjamin.jaderberg@ibm.com, jtindall@flatironinstitute.org",
@@ -14,7 +14,7 @@ setup(
     packages=find_packages(),
     zip_safe=False,
     install_requires=[
-        "qiskit~=1.3",
+        "qiskit~=2.1",
         "juliacall",
         "matplotlib~=3.9.0",
         "pylatexenc~=2.10",
