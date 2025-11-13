@@ -2,6 +2,7 @@ import numpy as np
 import json
 import rustworkx as rx
 from qiskit import QuantumCircuit
+from qiskit.quantum_info import SparsePauliOp
 from rustworkx.generators import grid_graph
 
 
@@ -72,3 +73,12 @@ def parse_circuit(
                 f"Error with gate:{gate_name}. Gates with more than 3 qubits have not been implemented yet"
             )
     return tuple(circuit), tuple(connectivity)
+
+
+def translate_observable(
+    op: SparsePauliOp,
+) -> tuple[tuple[str, tuple[int, ...], float], ...]:
+    return tuple(
+        (name, tuple(qubits), float(coeff))
+        for name, qubits, coeff in op.to_sparse_list()
+    )
