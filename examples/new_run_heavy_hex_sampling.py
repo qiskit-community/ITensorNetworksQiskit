@@ -9,15 +9,14 @@ from juliacall import Main as jl
 from qiskit import transpile, QuantumCircuit
 from qiskit_ibm_runtime.fake_provider import FakeSherbrooke
 
-from itensornetworks_qiskit.graph import extract_cx_gates
-from itensornetworks_qiskit.ibm_device_map import ibm_qubit_layout
+from itensornetworks_qiskit.graph import graph_from_edges, graph_to_grid
 from itensornetworks_qiskit.sample import itn_samples_to_counts_dict
-from itensornetworks_qiskit.utils import qiskit_circ_to_itn_circ_2d
+from itensornetworks_qiskit.translate import circuit_description
 
 jl.seval("using ITensorNetworksQiskit")
 
-# Any Julia functions from outside our package should be added here
-jl.seval("using ITensorNetworks: siteinds, maxlinkdim")
+# # Any Julia functions from outside our package should be added here
+# jl.seval("using ITensorNetworks: siteinds, maxlinkdim")
 
 # Note here we use a real device graph, which is subtly different from CouplingMap().from_heavy_hex
 # used in other examples. Any connectivity can be used if a map can be provided between qubit
@@ -30,48 +29,70 @@ print(f"Created heavy-hex graph with {cmap.size()} qubits")
 graph = backend.coupling_map.get_edges()
 
 # Remove duplicates with opposite direction
-graph = [list(s) for s in set([frozenset(item) for item in graph])]
+edges = [list(s) for s in set([frozenset(item) for item in graph])]
 
 qc = QuantumCircuit(backend.num_qubits)
-for _ in range(3):
-    for edge in graph:
+for _ in range(1):
+    for edge in edges[:1]:
+        print(edge)
         qc.h(edge[0])
         qc.h(edge[1])
         qc.cx(edge[0], edge[1])
         qc.ry(random.random() * np.pi, edge[0])
         qc.ry(random.random() * np.pi, edge[1])
 
-qc = transpile(qc, basis_gates=["rx", "ry", "rz", "cx"], backend=backend)
+circuit, qiskit_connectivity = circuit_description(qc)
+print(circuit)
+graph = graph_from_edges(qiskit_connectivity)
+qubit_map = graph_to_grid(graph, 20)
+print(qubit_map)
 
-# Define a 1-indexed map from qubit indices to 2d integer coordinate grid (needed for sampling)
-two_d_layout = ibm_qubit_layout[n_qubits]
-qmap = {i + 1: tuple(q + 1 for q in two_d_layout[i]) for i in range(n_qubits)}
+bpc, error = jl.tn_from_qiskit_circuit(circuit, qubit_map, qiskit_connectivity)
+print(bpc)
+print("Sampling...")
+samples = jl.sample_psi(bpc, 50, 5, 5)
+samples_qiskit = []
+for sample in samples:
+    samples_qiskit.append(([jl.get(sample, coord, None) for _, coord in qubit_map]))
+print(samples_qiskit)
 
-# convert circuit to required ITN format
-itn_circ = qiskit_circ_to_itn_circ_2d(qc, qmap=qmap)
 
-# build ITN graph from the Qiskit circuit
-cx_gates = extract_cx_gates(itn_circ)
-g = jl.build_graph_from_gates(jl.seval(cx_gates))
-s = jl.siteinds("S=1/2", g)
+# circuit, qiskit_connectivity = circuit_description(qc)
+# graph = graph_from_edges(qiskit_connectivity)
+# qubit_map = graph_to_grid(graph, 20)
+#
+# bpc, error = jl.tn_from_qiskit_circuit(circuit, qubit_map, qiskit_connectivity)
+# print(bpc)
+# print("Sampling...")
+# samples = jl.sample_psi(bpc, 50, 5, 5)
+# samples_qiskit = []
+# for sample in samples:
+#     samples_qiskit.append(([jl.get(sample, coord, None) for _, coord in qubit_map]))
+# print(samples_qiskit)
 
-# set a desired maximum bond dimension
-chi = 50
-start_time = datetime.now()
-
-# run simulation: Note obtaining the state and sampling takes ~2 minutes to run
-
-# extract output MPS and belief propagation cache (bpc)
-psi, bpc, errors = jl.tn_from_circuit(itn_circ, chi, s)
-print("Maximum bond dimension", jl.maxlinkdim(psi))
-print("Estimated final state fidelity:", np.prod(1 - np.array(errors)))
-
-print(f"Sampling from circuit")
-num_shots = 10
-itn_shots = jl.sample_psi(psi, num_shots, 5, 5)
-
-t = datetime.now() - start_time
-print(f"Simulation and sampling completed in {t}")
-
-shots = itn_samples_to_counts_dict(itn_shots, qmap)
-print(f"Shot counts of the circuit: {shots}")
+# circuit, edges = circuit_description(qc)
+# graph = graph_from_edges(edges)
+# qubit_map = graph_to_grid(graph, max_grid_size=20)
+#
+# print(circuit)
+# # set a desired maximum bond dimension
+# chi = 5
+# start_time = datetime.now()
+#
+# # run simulation: Note obtaining the state and sampling takes ~2 minutes to run
+#
+# # extract output MPS and belief propagation cache (bpc)
+# bpc, errors = jl.tn_from_qiskit_circuit(circuit, qubit_map, edges)
+# # TODO: I don't know what the next method has been renamed to
+# # print("Maximum bond dimension", jl.maxlinkdim(bpc))
+# print("Estimated final state fidelity:", np.prod(1 - np.array(errors)))
+#
+# print("Sampling from circuit")
+# num_shots = 10
+# itn_shots = jl.sample_psi(bpc, num_shots, 5, 5)
+#
+# t = datetime.now() - start_time
+# print(f"Simulation and sampling completed in {t}")
+#
+# shots = itn_samples_to_counts_dict(itn_shots, qmap)
+# print(f"Shot counts of the circuit: {shots}")

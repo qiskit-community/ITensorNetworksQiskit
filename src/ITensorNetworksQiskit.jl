@@ -23,5 +23,6 @@ export get_graph
 export translate_circuit
 export py_translate
 export tn_from_qiskit_circuit
+export translate_observable
 
 end  # module ITensorNetworksQiskit
