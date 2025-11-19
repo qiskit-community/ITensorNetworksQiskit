@@ -40,7 +40,7 @@ def graph_to_grid(
     square = grid_graph(
         max_grid_size,
         max_grid_size,
-        weights=[(x + 1, y + 1) for x in range(max_grid_size) for y in range(max_grid_size)],
+        weights=[(x, y) for x in range(max_grid_size) for y in range(max_grid_size)],
     )
     possible_maps = rx.vf2_mapping(square, graph, subgraph=True, id_order=False)
     try:
