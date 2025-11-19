@@ -7,6 +7,9 @@ using ITensors: ITensor, ITensors
 
 # Adapted from main() in
 # https://github.com/JoeyT1994/ITensorNetworksExamples/examples/circuitHeavyHex.jl
+#
+#TODO: Rewrite the documentation
+#TODO: Remove no-longer used functions
 
 """
     tn_from_circuit(gates, chi, s, nlayers, bp_update_freq)
@@ -20,21 +23,16 @@ Furthermore, the belief propagation cache is updated every time an overlapping g
 (i.e., every time the two-qubit circuit depth increases), the default behaviour in
 TensorNetworkQuantumSimulator.
 
-# Arguments
-- `gates`: Gates in the format returned by `qiskit_circ_to_itn_circ_2d()`
-- `chi`: Maximum bond dimension for the simulatin
-- `s`: Site indices as built from ITensorNetworks.siteinds
 """
-function tn_from_circuit(circuit_data::Any,qubit_map::Any,connectivity_qiskit::Any)
+function tn_from_circuit(circuit_data::Any,qubit_map::Any,connectivity_qiskit::Any,chi::Any,cutoff::Any)
   circuit_data, qubit_map, connectivity_qiskit = py_translate_circuit(circuit_data, qubit_map, connectivity_qiskit)
   list_gates=translate_circuit(circuit_data,qubit_map)
-  println(list_gates)
   g=get_graph(connectivity_qiskit,qubit_map)
 
   ψ = tensornetworkstate(ComplexF32, v -> "↑", g, "S=1/2")
   ψ_bpc = BeliefPropagationCache(ψ)
   χ = 5
-  apply_kwargs = (; cutoff = 1.0e-12, maxdim = χ, normalize_tensors = true)
+  apply_kwargs = (; cutoff = cutoff, maxdim = chi, normalize_tensors = true)
   ψ_bpc, errs = apply_gates(list_gates, ψ_bpc; apply_kwargs)
   return ψ_bpc, errs
 end

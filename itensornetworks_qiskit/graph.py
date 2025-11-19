@@ -37,10 +37,14 @@ def graph_to_grid(
     A list with tuples (qubit_index,grid_coordinates) to be
     used for mapping qiskit circuit to TensorNetworkQuantumSimulator.
     """
+    # We initialize a square grid. Note that we give as weights
+    # julia indices that start at 1.
     square = grid_graph(
         max_grid_size,
         max_grid_size,
-        weights=[(x, y) for x in range(max_grid_size) for y in range(max_grid_size)],
+        weights=[
+            (x + 1, y + 1) for x in range(max_grid_size) for y in range(max_grid_size)
+        ],
     )
     possible_maps = rx.vf2_mapping(square, graph, subgraph=True, id_order=False)
     try:

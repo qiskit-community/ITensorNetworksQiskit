@@ -6,32 +6,31 @@ from datetime import datetime
 
 import numpy as np
 from juliacall import Main as jl
-from qiskit import transpile, QuantumCircuit
+from qiskit import QuantumCircuit, transpile
 from qiskit.providers.fake_provider import GenericBackendV2
 from qiskit.transpiler import CouplingMap
 from qiskit.visualization import plot_circuit_layout
+from qiskit_ibm_runtime.fake_provider import FakeSherbrooke
 
-from itensornetworks_qiskit.graph import extract_cx_gates, map_onto_2d_grid
-from itensornetworks_qiskit.sample import itn_samples_to_counts_dict
-from itensornetworks_qiskit.utils import qiskit_circ_to_itn_circ_2d
+from itensornetworks_qiskit.convert import circuit_description
+from itensornetworks_qiskit.graph import (
+    graph_from_edges,
+    graph_to_grid,
+)
+from itensornetworks_qiskit.ibm_device_map import ibm_qubit_layout
 
 jl.seval("using ITensorNetworksQiskit")
 
-# Any Julia functions from outside our package should be added here
-jl.seval("using ITensorNetworks: siteinds, maxlinkdim")
 
-cmap = CouplingMap().from_heavy_hex(5)
+cmap = CouplingMap().from_heavy_hex(3)
 n_qubits = cmap.size()
 print(f"Created heavy-hex graph with {cmap.size()} qubits")
 backend = GenericBackendV2(n_qubits, coupling_map=cmap)
 
 graph = backend.coupling_map.get_edges()
 # Remove duplicates with opposite direction
-edges = [list(s) for s in set([frozenset(item) for item in graph])]
+edges = tuple([tuple(s) for s in set([frozenset(item) for item in graph])])
 
-# Generate a map between the qubit indices and a 2d coordinate grid. This can take a very long
-# time for large graphs!
-qmap = map_onto_2d_grid(edges)
 
 qc = QuantumCircuit(backend.num_qubits)
 num_layers = 5
@@ -43,38 +42,37 @@ for i in range(num_layers):
         qc.ry(random.random() * np.pi, edge[0])
         qc.ry(random.random() * np.pi, edge[1])
 
-qc = transpile(qc, basis_gates=["rx", "ry", "rz", "cx"], backend=backend)
-plot_circuit_layout(qc, backend, qubit_coordinates=[qmap[i] for i in range(n_qubits)]).show()
+qmap = graph_to_grid(graph_from_edges(edges))
+# TODO: I can not visualize this but it might be a problem of my system
+# plot_circuit_layout(
+#     qc, backend, qubit_coordinates=[qmap[i][1] for i in range(n_qubits)]
+# ).show()
 
-cmap = backend.coupling_map
-
-# Make the 2d coordinate mapping 1-indexed for Julia
-qmap = {k + 1: tuple(q + 1 for q in v) for k, v in qmap.items()}
-
-# convert circuit to required ITN format
-itn_circ = qiskit_circ_to_itn_circ_2d(qc, qmap=qmap)
-
-# build ITN graph from the Qiskit circuit
-cx_gates = extract_cx_gates(itn_circ)
-g = jl.build_graph_from_gates(jl.seval(cx_gates))
-s = jl.siteinds("S=1/2", g)
+circuit, qiskit_connectivity = circuit_description(qc)
+graph = graph_from_edges(qiskit_connectivity)
 
 # set a desired maximum bond dimension
-chi = 50
+chi = 5
+cutoff = 1e-12
+bpc, errors = jl.tn_from_circuit(circuit, qmap, qiskit_connectivity, chi, cutoff)
+print("Sampling from circuit")
+samples = jl.sample_psi(bpc, 50, chi, chi)
+samples_qiskit = []
+for sample in samples:
+    samples_qiskit.append(([jl.get(sample, coord, None) for _, coord in qmap]))
+
 start_time = datetime.now()
 
-# run simulation
-# extract output MPS and belief propagation cache (bpc)
-psi, bpc, errors = jl.tn_from_circuit(itn_circ, chi, s)
-print("Maximum bond dimension", jl.maxlinkdim(psi))
+# TODO: I don't know what the next method has been renamed to
+# print("Maximum bond dimension", jl.maxlinkdim(bpc))
 print("Estimated final state fidelity:", np.prod(1 - np.array(errors)))
 
-print(f"Sampling from circuit")
+print("Sampling from circuit")
 num_shots = 10
-itn_shots = jl.sample_psi(psi, num_shots, 5, 5)
+itn_shots = jl.sample_psi(bpc, num_shots, 5, 5)
 
 t = datetime.now() - start_time
 print(f"Simulation and sampling completed in {t}")
 
-shots = itn_samples_to_counts_dict(itn_shots, qmap)
+shots = jl.pydict(jl.translate_samples(itn_shots, qmap))
 print(f"Shot counts of the circuit: {shots}")

@@ -24,6 +24,7 @@ export translate_circuit
 export py_translate
 export tn_from_qiskit_circuit
 export translate_observable
+export translate_samples
 
 include("graph.jl")
 export get_graph
