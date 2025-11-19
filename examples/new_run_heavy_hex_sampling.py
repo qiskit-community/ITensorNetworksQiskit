@@ -2,16 +2,14 @@
 generating the tensor network representation using ITN and then sampling bitstrings"""
 
 import random
-from datetime import datetime
 
 import numpy as np
 from juliacall import Main as jl
-from qiskit import transpile, QuantumCircuit
+from qiskit import QuantumCircuit
 from qiskit_ibm_runtime.fake_provider import FakeSherbrooke
 
+from itensornetworks_qiskit.convert import circuit_description
 from itensornetworks_qiskit.graph import graph_from_edges, graph_to_grid
-from itensornetworks_qiskit.sample import itn_samples_to_counts_dict
-from itensornetworks_qiskit.translate import circuit_description
 
 jl.seval("using ITensorNetworksQiskit")
 
@@ -33,8 +31,8 @@ edges = [list(s) for s in set([frozenset(item) for item in graph])]
 
 qc = QuantumCircuit(backend.num_qubits)
 for _ in range(1):
-    for edge in edges[:1]:
-        print(edge)
+    for edge in edges[:]:
+        # print(edge)
         qc.h(edge[0])
         qc.h(edge[1])
         qc.cx(edge[0], edge[1])
@@ -46,8 +44,7 @@ print(circuit)
 graph = graph_from_edges(qiskit_connectivity)
 qubit_map = graph_to_grid(graph, 20)
 print(qubit_map)
-
-bpc, error = jl.tn_from_qiskit_circuit(circuit, qubit_map, qiskit_connectivity)
+bpc, error = jl.tn_from_circuit(circuit, qubit_map, qiskit_connectivity)
 print(bpc)
 print("Sampling...")
 samples = jl.sample_psi(bpc, 50, 5, 5)
@@ -55,7 +52,6 @@ samples_qiskit = []
 for sample in samples:
     samples_qiskit.append(([jl.get(sample, coord, None) for _, coord in qubit_map]))
 print(samples_qiskit)
-
 
 # circuit, qiskit_connectivity = circuit_description(qc)
 # graph = graph_from_edges(qiskit_connectivity)

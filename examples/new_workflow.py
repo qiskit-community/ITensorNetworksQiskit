@@ -1,9 +1,10 @@
-from juliacall import Main as jl
-from qiskit.quantum_info import SparsePauliOp
-from itensornetworks_qiskit.translate import observable_description, circuit_description
-from itensornetworks_qiskit.graph import graph_from_edges, graph_to_grid
-from qiskit.circuit.library import real_amplitudes
 import numpy as np
+from juliacall import Main as jl
+from qiskit.circuit.library import real_amplitudes
+from qiskit.quantum_info import SparsePauliOp
+
+from itensornetworks_qiskit.convert import observable_description, circuit_description
+from itensornetworks_qiskit.graph import graph_from_edges, graph_to_grid
 
 jl.seval("using ITensorNetworksQiskit")
 jl.seval("using TensorNetworkQuantumSimulator")
@@ -15,7 +16,7 @@ circuit, qiskit_connectivity = circuit_description(qc)
 graph = graph_from_edges(qiskit_connectivity)
 qubit_map = graph_to_grid(graph, 10)
 
-bpc, error = jl.tn_from_qiskit_circuit(circuit, qubit_map, qiskit_connectivity)
+bpc, error = jl.tn_from_circuit(circuit, qubit_map, qiskit_connectivity)
 print("Sampling...")
 samples = jl.sample_psi(bpc, 50, 5, 5)
 samples_qiskit = []

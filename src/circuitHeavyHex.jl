@@ -1,5 +1,9 @@
-using ITensorNetworks
-const ITN = ITensorNetworks
+using Graphs
+using NamedGraphs
+using TensorNetworkQuantumSimulator
+const TN = TensorNetworkQuantumSimulator
+using NamedGraphs: NamedGraphs, neighbors
+using ITensors: ITensor, ITensors
 
 # Adapted from main() in
 # https://github.com/JoeyT1994/ITensorNetworksExamples/examples/circuitHeavyHex.jl
@@ -21,16 +25,18 @@ TensorNetworkQuantumSimulator.
 - `chi`: Maximum bond dimension for the simulatin
 - `s`: Site indices as built from ITensorNetworks.siteinds
 """
-function tn_from_circuit(gates, chi, s)
-    if startswith(gates, "[")
-        gates = eval(Meta.parse(gates))
-    end
-    ψ = ITensorNetwork(v -> "↑", s)
-    apply_kwargs = (; cutoff = 1e-12, maxdim = chi)
+function tn_from_circuit(circuit_data::Any,qubit_map::Any,connectivity_qiskit::Any)
+  circuit_data, qubit_map, connectivity_qiskit = py_translate_circuit(circuit_data, qubit_map, connectivity_qiskit)
+  list_gates=translate_circuit(circuit_data,qubit_map)
+  println(list_gates)
+  g=get_graph(connectivity_qiskit,qubit_map)
 
-    bpc = build_bp_cache(ψ)
-    ψ, bpc, errors = apply(gates, ψ, bpc; apply_kwargs)
-    return ψ, bpc, errors
+  ψ = tensornetworkstate(ComplexF32, v -> "↑", g, "S=1/2")
+  ψ_bpc = BeliefPropagationCache(ψ)
+  χ = 5
+  apply_kwargs = (; cutoff = 1.0e-12, maxdim = χ, normalize_tensors = true)
+  ψ_bpc, errs = apply_gates(list_gates, ψ_bpc; apply_kwargs)
+  return ψ_bpc, errs
 end
 
 function generate_graph(nx, ny)

@@ -28,7 +28,7 @@ def circuit_description(
     connectivity = set()
     for inst in qc:
         gate_name = inst.name
-        qubit_indices = [q._index for q in inst.qubits]
+        qubit_indices = [q._index+1 for q in inst.qubits]
         parameters = inst.params
         circuit.append((gate_name, tuple(qubit_indices), tuple(parameters)))
         if len(qubit_indices) == 2:

@@ -4,18 +4,6 @@ using TensorNetworkQuantumSimulator
 using NamedGraphs: NamedGraphs, neighbors
 using ITensors: ITensor, ITensors
 
-function tn_from_qiskit_circuit(circuit_data::Any,qubit_map::Any,connectivity_qiskit::Any)
-  circuit_data,qubit_map,connectivity_qiskit=py_translate_circuit(circuit_data,qubit_map,connectivity_qiskit)
-  list_gates=translate_circuit(circuit_data,qubit_map)
-  g=get_graph(connectivity_qiskit,qubit_map)
-  ψ = tensornetworkstate(ComplexF32, v -> "↑", g, "S=1/2")
-  ψ_bpc = BeliefPropagationCache(ψ)
-  χ = 5
-  apply_kwargs = (; cutoff = 1.0e-12, maxdim = χ, normalize_tensors = true)
-  ψ_bpc, errs = apply_gates(list_gates, ψ_bpc ;apply_kwargs)
-  return ψ_bpc, errs
-end
-
 function py_translate_circuit(circuit_data::Any,qubit_map::Any,connectivity_qiskit::Any)
   circuit_data = Vector{Tuple{String, Vector{Int}, Vector{Any}}}([
     (name, Vector{Int}([index for index in indices]), Vector{Any}([parameter for parameter in parameters])) for (name,indices,parameters) in circuit_data
@@ -92,26 +80,3 @@ name_mapping=Dict("rx"=>convertRy,
                   "cx"=>convertCNOT,
                   "h"=>convertH,
                   )
-
-
-function get_graph(connectivity_qiskit::Any,qubit_map::Any)
-  circuit_data,qubit_map,connectivity_qiskit=py_translate([],qubit_map,connectivity_qiskit)
-  return get_graph(connectivity_qiskit,qubit_map)
-end
-function get_graph(connectivity_qiskit::Vector{Tuple{Int,Int}},qubit_map::Dict{Int,Tuple{Int,Int}})
-  nodes_qiskit=Set([q for pair in connectivity_qiskit for q in pair])
-
-  g = NamedGraph{Tuple{Int, Int}}()
-
-  # Add nodes
-  for node in nodes_qiskit
-    add_vertex!(g, Tuple(qubit_map[node]))
-  end
-
-  # Add edges
-  for edge in connectivity_qiskit 
-    add_edge!(g, Tuple([Tuple(qubit_map[e]) for e in edge]))
-    add_edge!(g, Tuple([Tuple(qubit_map[e]) for e in edge]))
-  end
-  return g
-end
