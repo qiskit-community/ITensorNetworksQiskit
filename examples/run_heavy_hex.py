@@ -1,30 +1,32 @@
-"""Example building a large heavy-hex circuit with 10 repeated layers of random gates,
+"""Example building a large heavy-hex circuit with 5 repeated layers of random gates,
 generating the tensor network representation using ITN and then computing observables"""
 
 import random
-from datetime import datetime
 
 import numpy as np
+from datetime import datetime
 from juliacall import Main as jl
-from qiskit import transpile, QuantumCircuit
-from qiskit.providers.fake_provider import GenericBackendV2
-from qiskit.transpiler import CouplingMap
+from qiskit import QuantumCircuit, transpile
 from qiskit.visualization import plot_circuit_layout
+from qiskit_ibm_runtime.fake_provider import FakeSherbrooke
 
-from itensornetworks_qiskit.graph import extract_cx_gates
-from itensornetworks_qiskit.utils import qiskit_circ_to_itn_circ_2d
+from itensornetworks_qiskit.convert import circuit_description
+from itensornetworks_qiskit.graph import graph_from_edges, graph_to_grid
+from itensornetworks_qiskit.ibm_device_map import ibm_qubit_layout
 
 jl.seval("using ITensorNetworksQiskit")
+jl.seval("using TensorNetworkQuantumSimulator: network")
+jl.seval("using ITensorNetworks: siteinds")
 
-# Any Julia functions from outside our package should be added here
-jl.seval("using ITensorNetworks: siteinds, maxlinkdim")
+backend = FakeSherbrooke()
+n_qubits = backend.num_qubits
+cmap = backend.coupling_map
+print(f"Created heavy-hex graph from {backend.name} with {cmap.size()} qubits")
 
-cmap = CouplingMap().from_heavy_hex(7)
-print(f"Created heavy-hex graph with {cmap.size()} qubits")
-backend = GenericBackendV2(cmap.size(), coupling_map=cmap)
 graph = backend.coupling_map.get_edges()
+
 # Remove duplicates with opposite direction
-graph = [list(s) for s in set([frozenset(item) for item in graph])]
+edges = [list(s) for s in set([frozenset(item) for item in graph])]
 
 qc = QuantumCircuit(backend.num_qubits)
 num_layers = 5
@@ -37,34 +39,39 @@ for i in range(num_layers):
         qc.ry(random.random() * np.pi, edge[1])
 
 qc = transpile(qc, basis_gates=["rx", "ry", "rz", "cx"], backend=backend)
-plot_circuit_layout(qc, backend).show()
+qmap = graph_to_grid(graph_from_edges(edges))
+# plot_circuit_layout(qc, backend, qubit_coordinates=[qmap[i][1] for i in range(n_qubits)]).show()
 
-# convert circuit to required ITN format
-itn_circ = qiskit_circ_to_itn_circ_2d(qc)
+circuit, qiskit_connectivity = circuit_description(qc)
+graph = graph_from_edges(qiskit_connectivity)
 
-# build ITN graph from the Qiskit circuit
-graph_string = extract_cx_gates(itn_circ)
-g = jl.build_graph_from_gates(jl.seval(graph_string))
-s = jl.siteinds("S=1/2", g)
+# Set tensor network truncation parameters
+chi = 10
+cutoff = 1e-12
 
-# set a desired maximum bond dimension
-chi = 50
 start_time = datetime.now()
-
-# run simulation
-# extract output MPS and belief propagation cache (bpc)
-psi, bpc, errors = jl.tn_from_circuit(itn_circ, chi, s)
-print("Maximum bond dimension", jl.maxlinkdim(psi))
+psi_bpc, errors = jl.tn_from_circuit(circuit, qmap, qiskit_connectivity, chi, cutoff)
 print("Estimated final state fidelity:", np.prod(1 - np.array(errors)))
 
 t = datetime.now() - start_time
 print(t)
 
 print("***** ITN results *****")
-itn_overlap = jl.overlap_with_zero(psi, s)
-itn_eval = jl.pauli_expectation("Z", psi, [1, 2], bpc)
-itn_rdm = jl.get_first_edge_rdm_2d(psi, bpc, g)
+# TODO Figure out how to use get_graph. Once we do we can caller inner() and it should work
+g = jl.get_graph(qiskit_connectivity, qmap)
+s = jl.siteinds("S=1/2", g)
+itn_overlap = jl.overlap_with_zero(psi_bpc, s)
 print(f"Overlap with zero state: {itn_overlap}")
-print(f"σz expectation value of sites 1 and 2: {itn_eval}")
-print(f"2-qubit RDM of sites of first edge: {itn_rdm}")
+
+# Compute Z expectation values of qubits 0 and 1. We need to provide the 2d graph coordinate
+qmap_dict = {k: v for k, v in qmap}
+sites = [qmap_dict[qubit] for qubit in [1, 2]]
+z_eval = jl.pauli_expectation("Z", psi_bpc, sites)
+
+# TODO get this working or drop it, it's not in TNQS and is based on code we had that took an ITensorNetwork as input, Joey can help maybe
+psi = jl.network(psi_bpc)
+rdm = jl.rdm(psi, sites)
+
+print(f"σz expectation value of sites 1 and 2: {z_eval}")
+print(f"2-qubit RDM of sites of first edge: {rdm}")
 print("\n")

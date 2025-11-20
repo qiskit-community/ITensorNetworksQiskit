@@ -1,8 +1,7 @@
-using ITensorNetworks
-const ITN = ITensorNetworks
+const TN = TensorNetworkQuantumSimulator
 
-# Adapted from main() in
-# https://github.com/JoeyT1994/ITensorNetworksExamples/examples/circuitHeavyHex.jl
+#TODO: Rewrite the documentation
+#TODO: Remove no-longer used functions
 
 """
     tn_from_circuit(gates, chi, s, nlayers, bp_update_freq)
@@ -16,21 +15,18 @@ Furthermore, the belief propagation cache is updated every time an overlapping g
 (i.e., every time the two-qubit circuit depth increases), the default behaviour in
 TensorNetworkQuantumSimulator.
 
-# Arguments
-- `gates`: Gates in the format returned by `qiskit_circ_to_itn_circ_2d()`
-- `chi`: Maximum bond dimension for the simulatin
-- `s`: Site indices as built from ITensorNetworks.siteinds
 """
-function tn_from_circuit(gates, chi, s)
-    if startswith(gates, "[")
-        gates = eval(Meta.parse(gates))
-    end
-    ψ = ITensorNetwork(v -> "↑", s)
-    apply_kwargs = (; cutoff = 1e-12, maxdim = chi)
+function tn_from_circuit(circuit_data::Any,qubit_map::Any,connectivity_qiskit::Any,chi::Any,cutoff::Any)
+  circuit_data, qubit_map, connectivity_qiskit = py_translate_circuit(circuit_data, qubit_map, connectivity_qiskit)
+  list_gates=translate_circuit(circuit_data,qubit_map)
+  g=get_graph(connectivity_qiskit,qubit_map)
 
-    bpc = build_bp_cache(ψ)
-    ψ, bpc, errors = apply(gates, ψ, bpc; apply_kwargs)
-    return ψ, bpc, errors
+  ψ = tensornetworkstate(ComplexF32, v -> "↑", g, "S=1/2")
+  ψ_bpc = BeliefPropagationCache(ψ)
+  χ = 5
+  apply_kwargs = (; cutoff = cutoff, maxdim = chi, normalize_tensors = true)
+  ψ_bpc, errs = apply_gates(list_gates, ψ_bpc; apply_kwargs)
+  return ψ_bpc, errs
 end
 
 function generate_graph(nx, ny)
@@ -40,29 +36,27 @@ function generate_graph(nx, ny)
 end
 
 
-function pauli_expectation(pauli, ψ, sites, bpc)
+function pauli_expectation(pauli, ψ_bpc, sites)
      """
     Calculates the expectation value of a 1-body pauli observable "X", "Y", or "Z" for each
     site in sites. Uses the default expectation algorithm, which is belief propagation.
     """
     observables = [(pauli, [n]) for n in sites]
-    expect_sigmaz = real.(expect(ψ, observables; (cache!)=Ref(bpc)))
+    expect_sigmaz = real.(expect(ψ_bpc, observables))
 end
 
-function pauli_expectation_boundarymps(pauli, ψ, sites, boundarymps_rank)
+function pauli_expectation_boundarymps(pauli, ψ, sites, mps_bond_dim)
     """
     Similar to pauli_expectation above, uses the boundary MPS method, which is more precise and
     slower. See https://github.com/JoeyT1994/TensorNetworkQuantumSimulator/blob/22f8017e9798974bfe62f57afbc64ff9e239c246/src/expect.jl#L98
     for more details.
     """
     observables = [(pauli, [n]) for n in sites]
-    expect_sigmaz = real.(expect(ψ, observables; alg="boundarymps", cache_construction_kwargs = (; message_rank = boundarymps_rank)))
+    expect_sigmaz = real.(expect(ψ, observables; alg="boundarymps", mps_bond_dim))
 end
 
 ## TODO: generalise this to pass in a tuple of a pair which is known to be in the graph
-function get_first_edge_rdm_2d(ψ, bpc, g)
-     first_edge = first(edges(g))
-     site1, site2 = src(first_edge), dst(first_edge)
-     ρ = rdm(ψ, [site1, site2]; (cache!) = Ref(bpc))
+function get_rdm(ψ_bpc, sites)
+     ρ = rdm(ψ_bpc, sites)
      return ρ
 end

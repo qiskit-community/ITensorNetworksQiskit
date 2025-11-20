@@ -1,13 +1,6 @@
 # Some of the functions here are adapted or copied from
 # https://github.com/JoeyT1994/ITensorNetworksExamples so that we have a stable versioned copy here
 
-function gate_to_itensor(gate, s::IndsNetwork)
-    op_string = first(gate)
-    inds = reduce(vcat, s[v] for v in gate[2])
-    length(gate) == 3 && return op(op_string, inds; last(gate)...)
-    length(gate) == 2 && return op(op_string, inds)
-end
-
 function sq_overlap(ψ::ITensorNetwork, ϕ::ITensorNetwork; normalized = false, alg = "bp")
     numerator = inner(ψ, ϕ; alg)
     numerator = numerator * conj(numerator)
@@ -59,21 +52,6 @@ function heavy_hex_lattice_graph(n::Int64, m::Int64)
     return g
 end
 
-function ITensors.op(
-    ::OpName"xx_plus_yy",
-    ::SiteType"S=1/2";
-    θ::Float64 = pi / 2,
-    β::Float64 = 0.0,
-)
-    mat = zeros(ComplexF64, 4, 4)
-    mat[1, 1] = 1
-    mat[4, 4] = 1
-    mat[2, 2] = cos(0.5 * θ)
-    mat[2, 3] = -1.0 * im * sin(0.5 * θ) * exp(-1.0 * im * β)
-    mat[3, 2] = -1.0 * im * sin(0.5 * θ) * exp(1.0 * im * β)
-    mat[3, 3] = cos(0.5 * θ)
-    return mat
-end
 
 #Construct a graph with edges everywhere a two-site gate appears.
 function build_graph_from_gates(gate_list)

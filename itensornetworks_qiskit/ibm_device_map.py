@@ -823,4 +823,3 @@ ibm_qubit_layout[433] = [
 for key, val in ibm_qubit_layout.items():
     tuple_map = [tuple(pair) for pair in val]
     ibm_qubit_layout[key] = tuple_map
-
