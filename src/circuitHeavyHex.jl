@@ -1,13 +1,5 @@
-using Graphs
-using NamedGraphs
-using TensorNetworkQuantumSimulator
 const TN = TensorNetworkQuantumSimulator
-using NamedGraphs: NamedGraphs, neighbors
-using ITensors: ITensor, ITensors
 
-# Adapted from main() in
-# https://github.com/JoeyT1994/ITensorNetworksExamples/examples/circuitHeavyHex.jl
-#
 #TODO: Rewrite the documentation
 #TODO: Remove no-longer used functions
 
@@ -44,29 +36,27 @@ function generate_graph(nx, ny)
 end
 
 
-function pauli_expectation(pauli, ψ, sites, bpc)
+function pauli_expectation(pauli, ψ_bpc, sites)
      """
     Calculates the expectation value of a 1-body pauli observable "X", "Y", or "Z" for each
     site in sites. Uses the default expectation algorithm, which is belief propagation.
     """
     observables = [(pauli, [n]) for n in sites]
-    expect_sigmaz = real.(expect(ψ, observables; (cache!)=Ref(bpc)))
+    expect_sigmaz = real.(expect(ψ_bpc, observables))
 end
 
-function pauli_expectation_boundarymps(pauli, ψ, sites, boundarymps_rank)
+function pauli_expectation_boundarymps(pauli, ψ, sites, mps_bond_dim)
     """
     Similar to pauli_expectation above, uses the boundary MPS method, which is more precise and
     slower. See https://github.com/JoeyT1994/TensorNetworkQuantumSimulator/blob/22f8017e9798974bfe62f57afbc64ff9e239c246/src/expect.jl#L98
     for more details.
     """
     observables = [(pauli, [n]) for n in sites]
-    expect_sigmaz = real.(expect(ψ, observables; alg="boundarymps", cache_construction_kwargs = (; message_rank = boundarymps_rank)))
+    expect_sigmaz = real.(expect(ψ, observables; alg="boundarymps", mps_bond_dim))
 end
 
 ## TODO: generalise this to pass in a tuple of a pair which is known to be in the graph
-function get_first_edge_rdm_2d(ψ, bpc, g)
-     first_edge = first(edges(g))
-     site1, site2 = src(first_edge), dst(first_edge)
-     ρ = rdm(ψ, [site1, site2]; (cache!) = Ref(bpc))
+function get_rdm(ψ_bpc, sites)
+     ρ = rdm(ψ_bpc, sites)
      return ρ
 end

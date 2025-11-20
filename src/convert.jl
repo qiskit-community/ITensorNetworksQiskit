@@ -22,7 +22,10 @@ function translate_circuit(circuit_data::Vector{Tuple{String, Vector{ Int}, Vect
   for (qiskit_name,indices,parameter) in circuit_data
     if qiskit_name in keys(name_mapping)
       push!(list_gates,name_mapping[qiskit_name](indices,parameter,qubit_map))
+    else
+        throw(ArgumentError("Unsupported gate encountered: $(qiskit_name)."))
     end
+
   end
   return list_gates
 end

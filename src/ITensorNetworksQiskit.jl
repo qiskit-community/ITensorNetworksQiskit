@@ -1,19 +1,16 @@
 module ITensorNetworksQiskit
 
-# include("imports.jl")
-# include("utils.jl")
-# export build_graph_from_gates
-# export overlap_with_zero
-#
-# # heavy hex circuit example 
-# # heavy hex graph generated at runtime
+include("imports.jl")
+include("utils.jl")
+export rdm
+export sq_overlap
 
 include("circuitHeavyHex.jl")
 export generate_graph
 export tn_from_circuit
 export pauli_expectation
 export pauli_expectation_boundarymps
-export get_first_edge_rdm_2d
+export get_rdm
 
 include("sample.jl")
 export sample_psi
