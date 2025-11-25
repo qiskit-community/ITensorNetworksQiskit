@@ -2,6 +2,9 @@ from qiskit import QuantumCircuit
 from qiskit.quantum_info import SparsePauliOp
 
 
+SUPPORTED_GATES = {"rx", "ry", "rz", "rxx", "ryy", "rzz", "cx", "h", "x", "y", "z"}
+
+
 def circuit_description(
     qc: QuantumCircuit,
 ) -> tuple[

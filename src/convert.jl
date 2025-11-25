@@ -60,6 +60,15 @@ end
 function convertH(indices::Vector{Int},parameter::Vector{Any},qubit_map::Dict{Int, Tuple{Int,Int}})
   return ("H",[qubit_map[indices[1]]])
 end
+function convertX(indices::Vector{Int},parameter::Vector{Any},qubit_map::Dict{Int, Tuple{Int,Int}})
+  return ("X",[qubit_map[indices[1]]])
+end
+function convertY(indices::Vector{Int},parameter::Vector{Any},qubit_map::Dict{Int, Tuple{Int,Int}})
+  return ("Y",[qubit_map[indices[1]]])
+end
+function convertZ(indices::Vector{Int},parameter::Vector{Any},qubit_map::Dict{Int, Tuple{Int,Int}})
+  return ("Z",[qubit_map[indices[1]]])
+end
 name_mapping=Dict("rx"=>convertRy,
                   "ry"=>convertRy,
                   "rz"=>convertRz,
@@ -68,6 +77,9 @@ name_mapping=Dict("rx"=>convertRy,
                   "rzz"=>convertRzz,
                   "cx"=>convertCNOT,
                   "h"=>convertH,
+                  "x"=>convertX,
+                  "y"=>convertY,
+                  "z"=>convertZ,
                   )
 
 #Translate observables

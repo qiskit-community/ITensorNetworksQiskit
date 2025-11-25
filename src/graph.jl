@@ -1,8 +1,6 @@
 using Graphs
 using NamedGraphs
 using TensorNetworkQuantumSimulator
-using NamedGraphs: NamedGraphs, neighbors
-using ITensors: ITensor, ITensors
 
 function get_graph(connectivity_qiskit::Any,qubit_map::Any)
   circuit_data,qubit_map,connectivity_qiskit=py_translate([],qubit_map,connectivity_qiskit)

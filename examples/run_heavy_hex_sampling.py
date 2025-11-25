@@ -37,25 +37,27 @@ for _ in range(3):
         qc.ry(random.random() * np.pi, edge[1])
 
 qc = transpile(qc, backend, basis_gates=["cx", "h", "rx", "ry"])
-qmap = graph_to_grid(graph_from_edges(edges))
-plot_circuit_layout(qc, backend, qubit_coordinates=[qmap[i][1] for i in range(n_qubits)]).show()
 
-circuit, qiskit_connectivity = circuit_description(qc)
-graph = graph_from_edges(qiskit_connectivity)
-
+circuit, qmap = circuit_description(qc)
+graph = graph_from_edges(qmap)
+plot_circuit_layout(
+    qc, backend, qubit_coordinates=[qmap[i][1] for i in range(n_qubits)]
+).show()
 # Set tensor network truncation parameters
 chi = 5
 cutoff = 1e-12
 
 start_time = datetime.now()
-bpc, errors = jl.tn_from_circuit(circuit, qmap, qiskit_connectivity, chi, cutoff)
+bpc, errors = jl.tn_from_circuit(circuit, qmap, qmap, chi, cutoff)
 print("Estimated final state fidelity:", np.prod(1 - np.array(errors)))
 
 print("Sampling from circuit")
 num_shots = 10
 projected_mps_bond_dimension = 5
 norm_mps_bond_dimension = 5
-samples = jl.sample_psi(bpc, num_shots, projected_mps_bond_dimension, norm_mps_bond_dimension)
+samples = jl.sample_psi(
+    bpc, num_shots, projected_mps_bond_dimension, norm_mps_bond_dimension
+)
 
 t = datetime.now() - start_time
 print(f"Simulation and sampling completed in {t}")
