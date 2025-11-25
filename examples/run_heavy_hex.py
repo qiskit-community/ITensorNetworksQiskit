@@ -53,7 +53,7 @@ plot_circuit_layout(
 ).show()
 
 # Set tensor network truncation parameters
-chi = 10
+chi = 4
 cutoff = 1e-12
 
 start_time = datetime.now()
@@ -67,14 +67,9 @@ print(t)
 
 print("***** ITN results *****")
 
-psi_zero = jl.tensornetworkstate(
-    jl.ComplexF32,
-    jl.seval("""v -> "↑" """),
-    psi_bpc.network.tensornetwork.graph,  # We get the julia NamedGraph from the belief propagation cache.
-    "S=1/2",
-)
+psi_zero = jl.zerostate(psi_bpc.network.tensornetwork.graph)
 # TODO: Here I can get overlap of 2 networks, but I get some warning regarding too many indices if I do the overlap of zero and psi.
-# itn_overlap = jl.inner(psi_zero, psi, alg="bp")
+itn_overlap = jl.inner(psi_zero, psi, alg="bp")
 itn_overlap = np.real(jl.inner(psi, psi, alg="bp"))
 zero_overlap = np.real(jl.inner(psi_zero, psi_zero, alg="bp"))
 

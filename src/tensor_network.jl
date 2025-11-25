@@ -28,35 +28,3 @@ function tn_from_circuit(circuit_data::Any,qubit_map::Any,connectivity_qiskit::A
   ψ_bpc, errs = apply_gates(list_gates, ψ_bpc; apply_kwargs)
   return ψ_bpc, errs
 end
-
-function generate_graph(nx, ny)
-    g = heavy_hex_lattice_graph(nx, ny)
-    nqubits = length(vertices(g))
-    return g, nqubits
-end
-
-
-function pauli_expectation(pauli, ψ_bpc, sites)
-     """
-    Calculates the expectation value of a 1-body pauli observable "X", "Y", or "Z" for each
-    site in sites. Uses the default expectation algorithm, which is belief propagation.
-    """
-    observables = [(pauli, [n]) for n in sites]
-    expect_sigmaz = real.(expect(ψ_bpc, observables))
-end
-
-function pauli_expectation_boundarymps(pauli, ψ, sites, mps_bond_dim)
-    """
-    Similar to pauli_expectation above, uses the boundary MPS method, which is more precise and
-    slower. See https://github.com/JoeyT1994/TensorNetworkQuantumSimulator/blob/22f8017e9798974bfe62f57afbc64ff9e239c246/src/expect.jl#L98
-    for more details.
-    """
-    observables = [(pauli, [n]) for n in sites]
-    expect_sigmaz = real.(expect(ψ, observables; alg="boundarymps", mps_bond_dim))
-end
-
-## TODO: generalise this to pass in a tuple of a pair which is known to be in the graph
-function get_rdm(ψ_bpc, sites)
-     ρ = rdm(ψ_bpc, sites)
-     return ρ
-end

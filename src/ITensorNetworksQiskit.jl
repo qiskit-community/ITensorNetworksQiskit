@@ -5,7 +5,7 @@ include("utils.jl")
 export rdm
 export sq_overlap
 
-include("circuitHeavyHex.jl")
+include("tensor_network.jl")
 export generate_graph
 export tn_from_circuit
 export pauli_expectation
