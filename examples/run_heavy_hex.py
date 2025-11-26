@@ -2,16 +2,14 @@
 generating the tensor network representation using ITN and then computing observables"""
 
 import random
+from datetime import datetime
 
 import numpy as np
-from datetime import datetime
 from juliacall import Main as jl
 from qiskit import QuantumCircuit, transpile
 from qiskit.quantum_info import SparsePauliOp
-from qiskit.transpiler.passes import basis
 from qiskit.visualization import plot_circuit_layout
 from qiskit_ibm_runtime.fake_provider import FakeSherbrooke
-from rustworkx import floyd_warshall
 
 from itensornetworks_qiskit.convert import (
     circuit_description,
@@ -19,7 +17,6 @@ from itensornetworks_qiskit.convert import (
     SUPPORTED_GATES,
 )
 from itensornetworks_qiskit.graph import graph_from_edges, graph_to_grid
-from itensornetworks_qiskit.ibm_device_map import ibm_qubit_layout
 
 jl.seval("using ITensorNetworksQiskit")
 jl.seval("using TensorNetworkQuantumSimulator")
@@ -28,7 +25,6 @@ backend = FakeSherbrooke()
 n_qubits = backend.num_qubits
 cmap = backend.coupling_map
 print(f"Created heavy-hex graph from {backend.name} with {cmap.size()} qubits")
-
 
 # Remove duplicates with opposite direction
 connectivity = [list(s) for s in set([frozenset(item) for item in cmap.get_edges()])]
@@ -66,13 +62,10 @@ t = datetime.now() - start_time
 print(t)
 
 print("***** ITN results *****")
-
-psi_zero = jl.zerostate(psi_bpc.network.tensornetwork.graph)
-# TODO: Here I can get overlap of 2 networks, but I get some warning regarding too many indices if I do the overlap of zero and psi.
-itn_overlap = jl.inner(psi_zero, psi, alg="bp")
-itn_overlap = np.real(jl.inner(psi, psi, alg="bp"))
-zero_overlap = np.real(jl.inner(psi_zero, psi_zero, alg="bp"))
-
+# Create the |00..0> state using the same graph and site indices
+psi_zero = jl.zerostate(psi.tensornetwork.graph, psi.siteinds)
+# Compute the overlap |<0|psi>|^2
+itn_overlap = abs(jl.inner(psi_zero, psi, alg="bp"))**2
 print(f"Overlap with zero state: {itn_overlap}")
 
 # Compute Z expectation values of an observable on qubits 1 and 2 of the qiskit circuit.

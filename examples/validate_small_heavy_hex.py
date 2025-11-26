@@ -11,17 +11,17 @@ from matplotlib import pyplot as plt
 from qiskit import transpile, QuantumCircuit
 from qiskit.circuit.library import ZGate
 from qiskit.providers.fake_provider import GenericBackendV2
-from qiskit.quantum_info import partial_trace, Statevector, concurrence, DensityMatrix
+from qiskit.quantum_info import partial_trace, Statevector, concurrence, DensityMatrix, \
+    SparsePauliOp
 from qiskit.transpiler import CouplingMap
 from qiskit.visualization import plot_circuit_layout
 
-from itensornetworks_qiskit.graph import extract_cx_gates
-from itensornetworks_qiskit.utils import qiskit_circ_to_itn_circ_2d
+from itensornetworks_qiskit.convert import SUPPORTED_GATES, circuit_description, \
+    observable_description
+from itensornetworks_qiskit.graph import graph_to_grid, graph_from_edges
 
 jl.seval("using ITensorNetworksQiskit")
-
-# Any Julia functions from outside our package should be added here
-jl.seval("using ITensorNetworks: siteinds, maxlinkdim")
+jl.seval("using TensorNetworkQuantumSimulator")
 
 cmap = CouplingMap().from_heavy_hex(3)
 print(f"Created heavy-hex graph with {cmap.size()} qubits")
@@ -47,31 +47,36 @@ for _ in range(num_layers):
         qc.ry(random.random() * np.pi, edge[0])
         qc.ry(random.random() * np.pi, edge[1])
 
-    qc = transpile(qc, basis_gates=["rx", "ry", "rz", "cx"], backend=backend)
+    qc = transpile(qc, backend=backend, basis_gates=list(SUPPORTED_GATES))
 
-    # generate circuit in required ITN format
-    itn_circ = qiskit_circ_to_itn_circ_2d(qc)
+    circuit, edges = circuit_description(qc)
+    qmap = graph_to_grid(graph_from_edges(edges))
 
-    # build ITN graph from Qiskit
-    graph_string = extract_cx_gates(itn_circ)
-    g = jl.build_graph_from_gates(jl.seval(graph_string))
-
-    # derive site indices list and other params from graph
-    s = jl.siteinds("S=1/2", g)
     chi = 50
+    cutoff = 1e-12
     start_time = datetime.now()
 
-    psi, bpc, errors = jl.tn_from_circuit(itn_circ, chi, s)
-    print("Maximum bond dimension", jl.maxlinkdim(psi))
+    psi_bpc, errors = jl.tn_from_circuit(circuit, qmap, edges, chi, cutoff)
     print("Estimated final state fidelity:", np.prod(1 - np.array(errors)))
     t = datetime.now() - start_time
     print("Time taken to simulate layer:", t)
 
-    itn_overlap = jl.overlap_with_zero(psi, s)
-    itn_eval = jl.pauli_expectation("Z", psi, list(range(1, 6)), bpc)
+    psi_bpc = jl.rescale(psi_bpc)
+    psi = jl.network(psi_bpc)
+    psi_zero = jl.zerostate(psi.tensornetwork.graph, psi.siteinds)
+    itn_overlap = abs(jl.inner(psi_zero, psi, alg="bp"))**2
+
+    obs = SparsePauliOp.from_sparse_list([("Z", [q], 1.0) for q in range(5)], qc.num_qubits)
+    obs_jl = jl.translate_observable(observable_description(obs), qmap)
+    itn_eval = np.real((jl.expect(psi_bpc, obs_jl)))
+
     itn_evals.append(itn_eval)
 
-    itn_rdm = jl.get_first_edge_rdm_2d(psi, bpc, g)
+    qmap_dict = {qiskit_index: itn_index for (qiskit_index, itn_index) in qmap}
+    first_edge_qiskit = graph[0]
+    first_edge_itn = tuple(qmap_dict[q] for q in first_edge_qiskit)
+
+    itn_rdm = jl.reduced_density_matrix(psi_bpc, first_edge_itn, alg="bp")
 
     # Statevector simulation with Qiskit
     sv = Statevector(qc)
@@ -84,6 +89,8 @@ for _ in range(num_layers):
     # Numerically check both methods give same values
     np.testing.assert_almost_equal(itn_overlap, qiskit_overlap, decimal=5)
     np.testing.assert_almost_equal(itn_eval, qiskit_eval, decimal=5)
+
+    # TODO just need to figure out how to get this converion this into an np.array working
     converted_itn_rdm = DensityMatrix(np.array(itn_rdm))
 
     # Density matrices differ by 4 elements, but entanglement measures come out the same

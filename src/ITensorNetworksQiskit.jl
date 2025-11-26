@@ -4,6 +4,7 @@ include("imports.jl")
 include("utils.jl")
 export rdm
 export sq_overlap
+export inner
 
 include("tensor_network.jl")
 export generate_graph
@@ -14,7 +15,6 @@ export get_rdm
 
 include("sample.jl")
 export sample_psi
-export sample_psi_new
 
 include("convert.jl")
 export translate_circuit

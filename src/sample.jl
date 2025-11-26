@@ -10,9 +10,9 @@ Wrapper function for TNQS.sample. This is needed as keyword arguments cannot be 
 - `norm_mps_bond_dimension`: Bond dimension of the boundary MPS messages used to contract <ψ|ψ>.
 """
 function sample_psi(ψ_bpc, nsamples, projected_mps_bond_dimension=maxvirtualdim(ψt)*5, norm_mps_bond_dimension=maxvirtualdim(ψt)^2, partition_by="column")
-     nsamples = Int(nsamples)
-     ψ = network(ψ_bpc)
-  return TNQS.sample(ψ, nsamples; alg = "boundarymps", projected_mps_bond_dimension=projected_mps_bond_dimension,
+    nsamples = Int(nsamples)
+    ψ = network(ψ_bpc)
+    return TNQS.sample(ψ, nsamples; alg = "boundarymps", projected_mps_bond_dimension=projected_mps_bond_dimension,
                 norm_mps_bond_dimension=norm_mps_bond_dimension, partition_by=partition_by)
 end
 
