@@ -16,15 +16,22 @@ Furthermore, the belief propagation cache is updated every time an overlapping g
 TensorNetworkQuantumSimulator.
 
 """
-function tn_from_circuit(circuit_data::Any,qubit_map::Any,connectivity_qiskit::Any,chi::Any,cutoff::Any)
-  circuit_data, qubit_map, connectivity_qiskit = py_translate_circuit(circuit_data, qubit_map, connectivity_qiskit)
-  list_gates=translate_circuit(circuit_data,qubit_map)
-  g=get_graph(connectivity_qiskit,qubit_map)
+function tn_from_circuit(
+    circuit_data::Any,
+    qubit_map::Any,
+    connectivity_qiskit::Any,
+    chi::Any,
+    cutoff::Any,
+)
+    circuit_data, qubit_map, connectivity_qiskit =
+        py_translate_circuit(circuit_data, qubit_map, connectivity_qiskit)
+    list_gates = translate_circuit(circuit_data, qubit_map)
+    g = get_graph(connectivity_qiskit, qubit_map)
 
-  ψ = zerostate(g)
-  ψ_bpc = BeliefPropagationCache(ψ)
-  χ = 5
-  apply_kwargs = (; cutoff = cutoff, maxdim = chi, normalize_tensors = true)
-  ψ_bpc, errs = apply_gates(list_gates, ψ_bpc; apply_kwargs)
-  return ψ_bpc, errs
+    ψ = zerostate(g)
+    ψ_bpc = BeliefPropagationCache(ψ)
+    χ = 5
+    apply_kwargs = (; cutoff = cutoff, maxdim = chi, normalize_tensors = true)
+    ψ_bpc, errs = apply_gates(list_gates, ψ_bpc; apply_kwargs)
+    return ψ_bpc, errs
 end

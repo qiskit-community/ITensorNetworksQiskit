@@ -108,6 +108,7 @@ for _ in range(num_layers):
         )
     ).reshape((4, 4))
     converted_itn_rdm = DensityMatrix(np_rdm)
+
     np.testing.assert_almost_equal(converted_itn_rdm.data, qiskit_rdm.data, decimal=3)
 
 qc.draw(output="mpl", fold=-1, filename="validate_small_heavy_hex_circ.pdf")

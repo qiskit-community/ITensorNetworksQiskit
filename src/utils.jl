@@ -3,9 +3,9 @@
 using ITensors
 
 function overlap_with_zero(ψ::BeliefPropagationCache)
-  ψ_0= tensornetworkstate(ComplexF32, v -> "↑" ,ψ.network.tensornetwork.graph, "S=1/2")
-  #TODO: We can implement this function once we figure out how.
-  #For now this is a way of createing the 0 state.
+    ψ_0 = tensornetworkstate(ComplexF32, v -> "↑", ψ.network.tensornetwork.graph, "S=1/2")
+    #TODO: We can implement this function once we figure out how.
+    #For now this is a way of createing the 0 state.
 end
 
 
