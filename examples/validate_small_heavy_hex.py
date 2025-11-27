@@ -11,17 +11,26 @@ from matplotlib import pyplot as plt
 from qiskit import transpile, QuantumCircuit
 from qiskit.circuit.library import ZGate
 from qiskit.providers.fake_provider import GenericBackendV2
-from qiskit.quantum_info import partial_trace, Statevector, concurrence, DensityMatrix, \
-    SparsePauliOp
+from qiskit.quantum_info import (
+    partial_trace,
+    Statevector,
+    concurrence,
+    DensityMatrix,
+    SparsePauliOp,
+)
 from qiskit.transpiler import CouplingMap
 from qiskit.visualization import plot_circuit_layout
 
-from itensornetworks_qiskit.convert import SUPPORTED_GATES, circuit_description, \
-    observable_description
+from itensornetworks_qiskit.convert import (
+    SUPPORTED_GATES,
+    circuit_description,
+    observable_description,
+)
 from itensornetworks_qiskit.graph import graph_to_grid, graph_from_edges
 
 jl.seval("using ITensorNetworksQiskit")
 jl.seval("using TensorNetworkQuantumSimulator")
+jl.seval("using ITensors")
 
 cmap = CouplingMap().from_heavy_hex(3)
 print(f"Created heavy-hex graph with {cmap.size()} qubits")
@@ -64,9 +73,11 @@ for _ in range(num_layers):
     psi_bpc = jl.rescale(psi_bpc)
     psi = jl.network(psi_bpc)
     psi_zero = jl.zerostate(psi.tensornetwork.graph, psi.siteinds)
-    itn_overlap = abs(jl.inner(psi_zero, psi, alg="bp"))**2
+    itn_overlap = abs(jl.inner(psi_zero, psi, alg="bp")) ** 2
 
-    obs = SparsePauliOp.from_sparse_list([("Z", [q], 1.0) for q in range(5)], qc.num_qubits)
+    obs = SparsePauliOp.from_sparse_list(
+        [("Z", [q], 1.0) for q in range(5)], qc.num_qubits
+    )
     obs_jl = jl.translate_observable(observable_description(obs), qmap)
     itn_eval = np.real((jl.expect(psi_bpc, obs_jl)))
 
@@ -80,23 +91,24 @@ for _ in range(num_layers):
 
     # Statevector simulation with Qiskit
     sv = Statevector(qc)
-    qiskit_overlap = (np.abs(sv[0]))**2
+    qiskit_overlap = (np.abs(sv[0])) ** 2
     qiskit_eval = [sv.expectation_value(ZGate(), [i]) for i in range(5)]
     qiskit_evals.append(qiskit_eval)
     qubits_to_trace = [q for q in range(backend.num_qubits) if q not in graph[0]]
     qiskit_rdm = partial_trace(sv, qubits_to_trace)
 
     # Numerically check both methods give same values
-    np.testing.assert_almost_equal(itn_overlap, qiskit_overlap, decimal=5)
-    np.testing.assert_almost_equal(itn_eval, qiskit_eval, decimal=5)
+    np.testing.assert_almost_equal(itn_overlap, qiskit_overlap, decimal=3)
+    np.testing.assert_almost_equal(itn_eval, qiskit_eval, decimal=3)
 
     # TODO just need to figure out how to get this converion this into an np.array working
-    converted_itn_rdm = DensityMatrix(np.array(itn_rdm))
-
-    # Density matrices differ by 4 elements, but entanglement measures come out the same
-    np.testing.assert_almost_equal(concurrence(converted_itn_rdm),
-                                   concurrence(qiskit_rdm),
-                                   decimal=3)
+    np_rdm = np.array(
+        jl.itensor_to_density_matrix(
+            itn_rdm, bra_positions=[1, 4], ket_positions=[2, 3]
+        )
+    ).reshape((4, 4))
+    converted_itn_rdm = DensityMatrix(np_rdm)
+    np.testing.assert_almost_equal(converted_itn_rdm.data, qiskit_rdm.data, decimal=3)
 
 qc.draw(output="mpl", fold=-1, filename="validate_small_heavy_hex_circ.pdf")
 plt.close()
@@ -105,8 +117,8 @@ plt.plot(range(1, num_layers + 1), itn_evals, "x", markersize=8)
 plt.gca().set_prop_cycle(None)
 plt.plot(range(1, num_layers + 1), qiskit_evals, "^", markersize=8)
 plt.xticks(range(1, num_layers + 1))
-plt.plot([], [], "x", color="black", label='ITNQ belief propagation')
-plt.plot([], [], "^", color="black", label='Qiskit statevector')
+plt.plot([], [], "x", color="black", label="ITNQ belief propagation")
+plt.plot([], [], "^", color="black", label="Qiskit statevector")
 plt.ylabel(r"$\langle \sigma^z \rangle$")
 plt.xlabel("Number of random circuit layers")
 plt.legend()

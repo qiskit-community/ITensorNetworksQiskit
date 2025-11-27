@@ -5,6 +5,7 @@ include("utils.jl")
 export rdm
 export sq_overlap
 export inner
+export itensor_to_density_matrix
 
 include("tensor_network.jl")
 export generate_graph

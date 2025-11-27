@@ -1,0 +1,87 @@
+import random
+
+import numpy as np
+from datetime import datetime
+from juliacall import Main as jl
+from qiskit import QuantumCircuit, transpile
+from qiskit.quantum_info import SparsePauliOp
+from qiskit.transpiler.passes import basis
+from qiskit.visualization import plot_circuit_layout
+from qiskit_ibm_runtime.fake_provider import FakeSherbrooke
+from rustworkx import floyd_warshall
+
+from itensornetworks_qiskit.convert import (
+    circuit_description,
+    observable_description,
+    SUPPORTED_GATES,
+)
+from itensornetworks_qiskit.graph import graph_from_edges, graph_to_grid
+from itensornetworks_qiskit.ibm_device_map import ibm_qubit_layout
+
+jl.seval("using ITensorNetworksQiskit")
+jl.seval("using TensorNetworkQuantumSimulator")
+# using ITensors
+# using Graphs: center
+
+# function main()
+#     nx, ny = 4, 4
+#     g = named_grid((nx, ny))
+#
+#     nqubits = length(vertices(g))
+#     #Physical indices represent "Identity, X, Y, Z" in that order
+#     vz = first(center(g))
+#     ψ0 = paulitensornetworkstate(ComplexF32, v -> v == vz ? "Z" : "I", g)
+#
+#     maxdim, cutoff = 4, 1.0e-14
+#     apply_kwargs = (; maxdim, cutoff, normalize_tensors = false)
+#     #Parameters for BP, as the graph is not a tree (it has loops), we need to specify these
+#
+#     ψ = copy(ψ0)
+#
+#     ψ_bpc = BeliefPropagationCache(ψ)
+#
+#     h, J = -1.0, -1.0
+#     no_trotter_steps = 10
+#     δt = 0.04
+#
+#     #Do a 4-way edge coloring then Trotterise the Hamiltonian into commuting groups. Lets do Ising with the designated parameters
+#     layer = []
+#     ec = edge_color(g, 4)
+#     append!(layer, ("Rz", [v], h * δt) for v in vertices(g))
+#     for colored_edges in ec
+#         append!(layer, ("Rxx", pair, 2 * J * δt) for pair in colored_edges)
+#     end
+#     append!(layer, ("Rz", [v], h * δt) for v in vertices(g))
+#
+#     χinit = maxvirtualdim(ψ)
+#     println("Initial bond dimension of the Heisenberg operator is $χinit")
+#
+#     time = 0
+#
+#     Zs = Float64[]
+#
+#     for l in 1:no_trotter_steps
+#         println("Layer $l")
+#
+#         #Apply the circuit
+#         t = @timed ψ_bpc, errors =
+#             apply_gates(layer, ψ_bpc; apply_kwargs, verbose = false)
+#         #Reset the Frobenius norm to unity
+#         ψ_bpc = rescale(ψ_bpc)
+#         println("Frobenius norm of O(t) is $(partitionfunction(ψ_bpc))")
+#
+#         ψ = network(ψ_bpc)
+#         #Take traces
+#         tr_ψt = inner(ψ, identitytensornetworkstate(g, siteinds(ψ)); alg = "bp")
+#         tr_ψtψ0 = inner(ψ, ψ0; alg = "bp")
+#         println("Trace(O(t)) is $(tr_ψt)")
+#         println("Trace(O(t)O(0)) is $(tr_ψtψ0)")
+#
+#         # printing
+#         println("Took time: $(t.time) [s]. Max bond dimension: $(maxvirtualdim(ψ_bpc))")
+#         println("Maximum Gate error for layer was $(maximum(errors))")
+#     end
+#     return
+# end
+#
+# main()

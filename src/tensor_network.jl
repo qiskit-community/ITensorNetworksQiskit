@@ -21,7 +21,7 @@ function tn_from_circuit(circuit_data::Any,qubit_map::Any,connectivity_qiskit::A
   list_gates=translate_circuit(circuit_data,qubit_map)
   g=get_graph(connectivity_qiskit,qubit_map)
 
-  ψ = tensornetworkstate(ComplexF32, v -> "↑", g, "S=1/2")
+  ψ = zerostate(g)
   ψ_bpc = BeliefPropagationCache(ψ)
   χ = 5
   apply_kwargs = (; cutoff = cutoff, maxdim = chi, normalize_tensors = true)
