@@ -30,7 +30,7 @@ def sample_from_circuit(qc: QuantumCircuit):
 
 @ddt
 class TestSample(unittest.TestCase):
-    @data([0, 1, 2, 3, 4])
+    @data([0, 1, 2, 3, 4], [0, 3, 5], [0], [7], [3, 6])
     def test_ordering_samples(self, qubit_flips: list[int]):
         """
         We test that the ordering of the qubits is correct.
@@ -40,6 +40,8 @@ class TestSample(unittest.TestCase):
         # qc = real_amplitudes(8, entanglement="circular")
         # qc.assign_parameters([0.0] * qc.num_parameters, inplace=True)
         qc = QuantumCircuit(8)
+        # TODO: For now all the qubits need to be connected by at least 1 gate in order to be part of the graph.
+        # Ideally we would like to include those qubits in the graph as well in order to allow for idle qubits.
         for q in range(qc.num_qubits):
             qc.cx(q, (q + 1) % qc.num_qubits)
         for q in qubit_flips:
