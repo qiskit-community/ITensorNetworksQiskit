@@ -1,5 +1,6 @@
 """Example building a circuit with graph not from a real device, applying 3 repeated layers of
-random gates, generating the tensor network representation using ITN and then sampling bitstrings"""
+random gates, generating the tensor network representation using ITN and then sampling bitstrings
+"""
 
 import random
 from datetime import datetime
@@ -67,4 +68,3 @@ print(f"Simulation and sampling completed in {t}")
 
 shots = jl.pydict(jl.translate_samples(samples, qmap))
 print(f"Shot counts of the circuit: {shots}")
-

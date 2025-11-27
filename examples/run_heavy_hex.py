@@ -65,7 +65,7 @@ print("***** ITN results *****")
 # Create the |00..0> state using the same graph and site indices
 psi_zero = jl.zerostate(psi.tensornetwork.graph, psi.siteinds)
 # Compute the overlap |<0|psi>|^2
-itn_overlap = abs(jl.inner(psi_zero, psi, alg="bp"))**2
+itn_overlap = abs(jl.inner(psi_zero, psi, alg="bp")) ** 2
 print(f"Overlap with zero state: {itn_overlap}")
 
 # Compute Z expectation values of an observable on qubits 1 and 2 of the qiskit circuit.

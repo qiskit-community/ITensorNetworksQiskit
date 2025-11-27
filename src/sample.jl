@@ -8,6 +8,8 @@ Wrapper function for TNQS.sample. This is needed as keyword arguments cannot be 
 - `nsamples`: Number of shots to sample
 - `projected_mps_bond_dimension`:  Bond dimension of the projected boundary MPS messages used during contraction of the projected state <x|ψ>.
 - `norm_mps_bond_dimension`: Bond dimension of the boundary MPS messages used to contract <ψ|ψ>.
+- `partition_by`: "column" or "row": how to partition the graph.
+
 """
 function sample_psi(
     ψ_bpc,

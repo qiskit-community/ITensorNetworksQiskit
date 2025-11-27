@@ -138,6 +138,7 @@ function convertZ(
 )
     return ("Z", [qubit_map[indices[1]]])
 end
+
 name_mapping = Dict(
     "rx" => convertRy,
     "ry" => convertRy,

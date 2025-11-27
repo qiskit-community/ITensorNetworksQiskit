@@ -19,7 +19,7 @@ def circuit_description(
     Returns:
         Gates: Structured as a tuple of (name_gate,applied_qubits,parameters).
         For instance an Rxx gate could look like ("rxx",((0,1),),0.3).
-        Connectivity:
+        Connectivity: A tuple of tuples with all the pairs of qubits that are connected by a gate.
     """
     # We start by creating the list of circuit instructions
     # We need to check that the instructions are supported and that the parameters are bound.
@@ -39,7 +39,7 @@ def circuit_description(
             connectivity.add(tuple(qubit_indices))
         elif len(qubit_indices) > 2 and gate_name != "pauli":
             raise NotImplementedError(
-                f"Error with gate:{gate_name}. Gates with more than 3 qubits have not been implemented yet"
+                f"Error with gate:{gate_name}. Gates with more than 3 qubits have not been implemented yet."
             )
     return tuple(circuit), tuple(connectivity)
 
@@ -49,6 +49,10 @@ def observable_description(
 ) -> tuple[tuple[str, tuple[int, ...], float], ...]:
     """
     Creates a necessary description of an observable to be used in TensorNetworkQuantumSimulator.
+    Args:
+        op: A SparsePauliOp.
+    Returns:
+    The description
     """
     return tuple(
         (name, tuple(qubits), float(coeff.real))

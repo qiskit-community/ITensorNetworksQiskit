@@ -7,6 +7,13 @@ function get_graph(connectivity_qiskit::Any, qubit_map::Any)
         py_translate([], qubit_map, connectivity_qiskit)
     return get_graph(connectivity_qiskit, qubit_map)
 end
+
+"""
+Transform the connectivity from the circuit in Qiskit to a NamedGraph to be used in TNQS.
+# Arguments
+- `connectivity_qiskit`: Vector with the pairs of qubits that are connected in the Qiskit circuit.
+- `qubit_map`: A dictionary to map the qubit indices from Qiskit to coordinates in a 2D grid.
+"""
 function get_graph(
     connectivity_qiskit::Vector{Tuple{Int,Int}},
     qubit_map::Dict{Int,Tuple{Int,Int}},

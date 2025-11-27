@@ -2,19 +2,6 @@
 # https://github.com/JoeyT1994/ITensorNetworksExamples so that we have a stable versioned copy here
 using ITensors
 
-function overlap_with_zero(ψ::BeliefPropagationCache)
-    ψ_0 = tensornetworkstate(ComplexF32, v -> "↑", ψ.network.tensornetwork.graph, "S=1/2")
-    #TODO: We can implement this function once we figure out how.
-    #For now this is a way of createing the 0 state.
-end
-
-
-# function flatten_density_matrix(ρ::ITensor)
-#   indices=inds(ρ)
-#   ρ_flat= jl.Array(itn_rdm, *indices)
-#   return ρ_flat
-# end
-
 using ITensors
 
 """

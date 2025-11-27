@@ -21,7 +21,6 @@ def sample_from_circuit(qc: QuantumCircuit):
     g = graph_from_edges(edges)
     qubit_map = graph_to_grid(g, 6)
     bpc, error = jl.tn_from_circuit(circuit, qubit_map, edges, 5, 1e-12)
-    print(bpc)
     jl_samples = jl.sample_psi(bpc, 10)
     jl_samples_translated = jl.translate_samples(jl_samples, qubit_map)
     samples = jl.pydict(jl_samples_translated)
@@ -37,8 +36,6 @@ class TestSample(unittest.TestCase):
         We will flip some qubits so that all the samples are
         the same bitstring.
         """
-        # qc = real_amplitudes(8, entanglement="circular")
-        # qc.assign_parameters([0.0] * qc.num_parameters, inplace=True)
         qc = QuantumCircuit(8)
         # TODO: For now all the qubits need to be connected by at least 1 gate in order to be part of the graph.
         # Ideally we would like to include those qubits in the graph as well in order to allow for idle qubits.
@@ -48,6 +45,4 @@ class TestSample(unittest.TestCase):
             qc.x(q)
         tn_samples = sample_from_circuit(qc)
         target_samples = Statevector(qc).sample_counts(10)
-        print(tn_samples)
-        print(target_samples)
         self.assertEqual(tn_samples, target_samples)

@@ -1,10 +1,7 @@
 const TN = TensorNetworkQuantumSimulator
 
-#TODO: Rewrite the documentation
-#TODO: Remove no-longer used functions
-
 """
-    tn_from_circuit(gates, chi, s, nlayers, bp_update_freq)
+    tn_from_circuit(circuit_data, qubit_map, connectivity_qiskit, chi, cutoff)
 
 Returns an ITensorNetwork corresponding to the action of the gates on the |00..0> state. See the
 /examples/ directory for examples of usage.
@@ -14,7 +11,12 @@ https://github.com/JoeyT1994/TensorNetworkQuantumSimulator/blob/main/src/Backend
 Furthermore, the belief propagation cache is updated every time an overlapping gate is encountered
 (i.e., every time the two-qubit circuit depth increases), the default behaviour in
 TensorNetworkQuantumSimulator.
-
+# Arguments
+- `circuit_data`: The circuit description from the Qiskit circuit.
+- `qubit_map`: A dictionary to map the qubit indices from Qiskit to coordinates in a 2D grid.
+- `connectivity_qiskit`: Vector with the pairs of qubits that are connected in the Qiskit circuit.
+- `chi`: Bond dimension.
+- `cutoff`: Truncation threshold.
 """
 function tn_from_circuit(
     circuit_data::Any,

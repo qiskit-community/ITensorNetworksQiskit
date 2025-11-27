@@ -31,8 +31,8 @@ def graph_to_grid(
     Maps an arbitrary rustworkx graph to a grid. If no mapping exists
     it will raise a ValueError.
     Args:
-    graph: An arbitrary rustworkx graph to be mapped to a grid.
-    max_grid_size: Number of nodes on each side of the grid lattice.
+        graph: An arbitrary rustworkx graph to be mapped to a grid.
+        max_grid_size: Number of nodes on each side of the grid lattice.
     Retruns:
     A list with tuples (qubit_index,grid_coordinates) to be
     used for mapping qiskit circuit to TensorNetworkQuantumSimulator.
