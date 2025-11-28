@@ -54,7 +54,7 @@ The structure of this repository as follows:
 
 If you use this codebase for your research, please cite the latest version and extended author list
 from Zenodo:
-https://zenodo.org/records/16926969.
+https://doi.org/10.5281/zenodo.16926968.
 
 ## License
 
