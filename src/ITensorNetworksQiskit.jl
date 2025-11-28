@@ -1,11 +1,6 @@
 module ITensorNetworksQiskit
 
 include("imports.jl")
-include("utils.jl")
-export rdm
-export sq_overlap
-export inner
-export itensor_to_density_matrix
 
 include("tensor_network.jl")
 export generate_graph
@@ -27,4 +22,7 @@ export translate_samples
 include("graph.jl")
 export get_graph
 
-end  # module ITensorNetworksQiskit
+include("utils.jl")
+export itensor_to_density_matrix
+
+end

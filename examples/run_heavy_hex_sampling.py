@@ -3,18 +3,18 @@ layers of random gates, generating the tensor network representation using ITN a
 bitstrings"""
 
 import random
+from datetime import datetime
 
 import numpy as np
-from datetime import datetime
 from juliacall import Main as jl
 from qiskit import QuantumCircuit, transpile
 from qiskit.visualization import plot_circuit_layout
 from qiskit_ibm_runtime.fake_provider import FakeSherbrooke
 
 from itensornetworks_qiskit.convert import circuit_description
-from itensornetworks_qiskit.graph import graph_from_edges, graph_to_grid
-from itensornetworks_qiskit.ibm_device_map import ibm_qubit_layout
+from itensornetworks_qiskit.graph import graph_from_edges
 
+# Import any julia dependencies we are calling directly
 jl.seval("using ITensorNetworksQiskit")
 
 backend = FakeSherbrooke()
@@ -38,11 +38,16 @@ for _ in range(3):
 
 qc = transpile(qc, backend, basis_gates=["cx", "h", "rx", "ry"])
 
+# Convert the circuit to the form expected by TNQS
 circuit, qmap = circuit_description(qc)
+
+# Get the necessary mapping from qiskit qubit indices to 2D coordinate grid
 graph = graph_from_edges(qmap)
+
 plot_circuit_layout(
     qc, backend, qubit_coordinates=[qmap[i][1] for i in range(n_qubits)]
 ).show()
+
 # Set tensor network truncation parameters
 chi = 5
 cutoff = 1e-12

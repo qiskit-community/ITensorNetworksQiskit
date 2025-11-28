@@ -1,7 +1,3 @@
-# Some of the functions here are adapted or copied from
-# https://github.com/JoeyT1994/ITensorNetworksExamples so that we have a stable versioned copy here
-using ITensors
-
 using ITensors
 
 """
@@ -27,3 +23,4 @@ function itensor_to_density_matrix(T::ITensor; bra_positions, ket_positions)
     # Convert to dense Julia Array with correct order
     return Array(T, ordered_inds...)
 end
+

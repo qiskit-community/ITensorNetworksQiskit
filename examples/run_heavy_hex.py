@@ -18,6 +18,7 @@ from itensornetworks_qiskit.convert import (
 )
 from itensornetworks_qiskit.graph import graph_from_edges, graph_to_grid
 
+# Import any julia dependencies we are calling directly
 jl.seval("using ITensorNetworksQiskit")
 jl.seval("using TensorNetworkQuantumSimulator")
 
@@ -41,7 +42,10 @@ for i in range(num_layers):
 
 qc = transpile(qc, backend=backend, basis_gates=list(SUPPORTED_GATES))
 
+# Convert the circuit to the form expected by TNQS
 circuit, edges = circuit_description(qc)
+
+# Get the necessary mapping from qiskit qubit indices to 2D coordinate grid
 qmap = graph_to_grid(graph_from_edges(edges))
 
 plot_circuit_layout(

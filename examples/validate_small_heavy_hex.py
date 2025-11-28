@@ -14,7 +14,6 @@ from qiskit.providers.fake_provider import GenericBackendV2
 from qiskit.quantum_info import (
     partial_trace,
     Statevector,
-    concurrence,
     DensityMatrix,
     SparsePauliOp,
 )
@@ -27,10 +26,11 @@ from itensornetworks_qiskit.convert import (
     observable_description,
 )
 from itensornetworks_qiskit.graph import graph_to_grid, graph_from_edges
+from itensornetworks_qiskit.observables import rdm
 
 jl.seval("using ITensorNetworksQiskit")
+jl.seval("using ITensorNetworksQiskit: rdm")
 jl.seval("using TensorNetworkQuantumSimulator")
-jl.seval("using ITensors")
 
 cmap = CouplingMap().from_heavy_hex(3)
 print(f"Created heavy-hex graph with {cmap.size()} qubits")
@@ -58,9 +58,13 @@ for _ in range(num_layers):
 
     qc = transpile(qc, backend=backend, basis_gates=list(SUPPORTED_GATES))
 
+    # Convert the circuit to the form expected by TNQS
     circuit, edges = circuit_description(qc)
+
+    # Get the necessary mapping from qiskit qubit indices to 2D coordinate grid
     qmap = graph_to_grid(graph_from_edges(edges))
 
+    # Set tensor network truncation parameters
     chi = 50
     cutoff = 1e-12
     start_time = datetime.now()
@@ -70,28 +74,29 @@ for _ in range(num_layers):
     t = datetime.now() - start_time
     print("Time taken to simulate layer:", t)
 
+    # Get the overlap with the |00...0> state
     psi_bpc = jl.rescale(psi_bpc)
     psi = jl.network(psi_bpc)
     psi_zero = jl.zerostate(psi.tensornetwork.graph, psi.siteinds)
-    itn_overlap = abs(jl.inner(psi_zero, psi, alg="bp")) ** 2
+    itn_overlap = abs(jl.inner(psi_zero, psi, alg="bp"))**2
 
+    # Get expectation values
     obs = SparsePauliOp.from_sparse_list(
         [("Z", [q], 1.0) for q in range(5)], qc.num_qubits
     )
     obs_jl = jl.translate_observable(observable_description(obs), qmap)
     itn_eval = np.real((jl.expect(psi_bpc, obs_jl)))
-
     itn_evals.append(itn_eval)
 
+    # Obtain the 2-qubit RDM of the first edge
     qmap_dict = {qiskit_index: itn_index for (qiskit_index, itn_index) in qmap}
     first_edge_qiskit = graph[0]
     first_edge_itn = tuple(qmap_dict[q] for q in first_edge_qiskit)
-
-    itn_rdm = jl.reduced_density_matrix(psi_bpc, first_edge_itn, alg="bp")
+    itn_rdm = rdm(psi_bpc, first_edge_itn, alg="bp")
 
     # Statevector simulation with Qiskit
     sv = Statevector(qc)
-    qiskit_overlap = (np.abs(sv[0])) ** 2
+    qiskit_overlap = (np.abs(sv[0]))**2
     qiskit_eval = [sv.expectation_value(ZGate(), [i]) for i in range(5)]
     qiskit_evals.append(qiskit_eval)
     qubits_to_trace = [q for q in range(backend.num_qubits) if q not in graph[0]]
@@ -101,16 +106,11 @@ for _ in range(num_layers):
     np.testing.assert_almost_equal(itn_overlap, qiskit_overlap, decimal=3)
     np.testing.assert_almost_equal(itn_eval, qiskit_eval, decimal=3)
 
-    # TODO just need to figure out how to get this converion this into an np.array working
-    np_rdm = np.array(
-        jl.itensor_to_density_matrix(
-            itn_rdm, bra_positions=[1, 4], ket_positions=[2, 3]
-        )
-    ).reshape((4, 4))
-    converted_itn_rdm = DensityMatrix(np_rdm)
+    converted_itn_rdm = DensityMatrix(itn_rdm)
 
     np.testing.assert_almost_equal(converted_itn_rdm.data, qiskit_rdm.data, decimal=3)
 
+# Plot the <Z> expectation values to see agreement
 qc.draw(output="mpl", fold=-1, filename="validate_small_heavy_hex_circ.pdf")
 plt.close()
 plot_circuit_layout(qc, backend).show()
@@ -124,3 +124,4 @@ plt.ylabel(r"$\langle \sigma^z \rangle$")
 plt.xlabel("Number of random circuit layers")
 plt.legend()
 plt.savefig("validate_small_heavy_hex_sz.pdf")
+plt.show()
