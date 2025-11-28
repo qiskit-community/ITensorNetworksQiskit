@@ -1,19 +1,20 @@
 # ITensorNetworksQiskit
 
-**ITensorNetworksQiskit** is a lightweight library that enables easy use of [ITensorNetworks.jl](https://github.com/ITensor/ITensorNetworks.jl) 
+**ITensorNetworksQiskit** is a lightweight library that enables easy use of [TensorNetworkQuantumSimulator.jl](https://github.com/JoeyT1994/TensorNetworkQuantumSimulator.jl) 
 for tensor network simulations of quantum circuits built in Qiskit. There are a number 
 of end-to-end examples for using this code in the `examples` folder.
 
 > [!WARNING]
-> This library is an interface to [ITensorNetworks.jl](https://github.com/ITensor/ITensorNetworks.jl) which uses belief propagation
-> for the underlying simulation. Beyond the error introduced by normal tensor network approximations
+> This library is an interface to [TensorNetworkQuantumSimulator.jl](https://github.com/JoeyT1994/TensorNetworkQuantumSimulator.jl)  which uses belief propagation (BP)
+> for the underlying circuit simulation and BP and/ or its corrections for taking measurements.
+> Beyond the error introduced by normal tensor network approximations
 > (e.g., finite bond dimension), the belief propagation ansatz is only fully accurate for a tree graph.
 > If the graph of the circuit is not a tree, then belief propagation is only an approximation
 > and all results should be taken with caution as they are approximate. The severity of this 
 > approximation can vary drastically and extensive testing should be done to validate it. 
-> See https://journals.aps.org/prxquantum/abstract/10.1103/PRXQuantum.5.010308 for an example paper 
-> where extensive testing is done to verify the accuracy of the BP approximation for the example of 
-> a loopy network.
+> See https://journals.aps.org/prxquantum/abstract/10.1103/PRXQuantum.5.010308 and https://arxiv.org/abs/2507.11424 for examples
+> where extensive testing is done to quantify the accuracy of the BP approximation for a 
+> a loopy tensor network.
 
 ## Installation and Setup
 
