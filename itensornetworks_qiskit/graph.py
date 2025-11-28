@@ -1,47 +1,58 @@
-import re
-
-import networkx as nx
-from networkx.algorithms.isomorphism import GraphMatcher
-from qiskit import QuantumCircuit
+import rustworkx as rx
+from rustworkx.generators import grid_graph
 
 
-def extract_cx_gates(itn_circ: str):
-    pattern = r'("CX", \[.*?\])'
-    cx_terms = re.findall(pattern, itn_circ)
-    modified_cx_terms = ["(" + term + ")" for term in cx_terms]
-    joined_cx_terms = ', '.join(modified_cx_terms)
-    return "[" + joined_cx_terms + "]"
-
-
-def cmap_from_circuit(qc: QuantumCircuit):
-    edges = []
-    for gate in qc:
-        if len(gate.qubits) >= 3:
-            raise NotImplemented("Please transpile to only 1 and 2 qubit gates")
-        if len(gate.qubits) == 2:
-            q0 = gate.qubits[0]
-            q1 = gate.qubits[1]
-            qubit_pair = [q0._index, q1._index]
-            if qubit_pair == [None, None]:
-                qubit_pair = [qc.layout.initial_layout[q0], qc.layout.initial_layout[q1]]
-            edges.append(qubit_pair)
-    unique_edges = [list(s) for s in set([frozenset(item) for item in edges])]
-    return unique_edges
-
-
-def map_onto_2d_grid(edges: list[list[int]] | list[tuple[int]], num_x: int = 10, num_y: int = 10):
+def graph_from_edges(edges: tuple[tuple[int, int], ...]) -> rx.PyGraph:
     """
-    Lay out a planar graph on an integer 2D grid.
-    :param edges: Undirected edge list, e.g. [[0, 1], [1, 2], … ].
-    :param num_x: Number of rows in the grid
-    :param num_y: Number of columns in the grid
+    Creates a rustworkx graph from a list of edges.
+    Args:
+        edges: List with pairs of qubit indices that are connected.
+        The indices do not need to start at 0 and there may be gaps between them.
+        Ex: [(2,7),(7,5),(5,1),(5,2)]
+    Returns:
+    A rustworkx graph that matches the connectivity between edges.
     """
-    if isinstance(edges[0], tuple):
-        edges = [list(e) for e in edges]
-    g = nx.Graph(edges)
-    square_g = nx.grid_2d_graph(num_x, num_y)
-    matcher = GraphMatcher(square_g, g)
-    coords_to_qubits = next(matcher.subgraph_isomorphisms_iter())
-    qubits_to_coords = {v: k for k, v in coords_to_qubits.items()}
+    graph = rx.PyGraph()
+    qubits = set(qubit_id for pair in edges for qubit_id in pair)
+    node_map = dict()
+    for qubit_id in qubits:
+        node_map[qubit_id] = graph.add_node(
+            qubit_id
+        )  # We add the node index as node data for the later mapping.
+    for qa, qb in edges:
+        graph.add_edge(node_map[qa], node_map[qb], None)
+    return graph
 
-    return qubits_to_coords
+
+def graph_to_grid(
+    graph: rx.PyGraph, max_grid_size: int = 20
+) -> list[tuple[int, tuple[int, int]]]:
+    """
+    Maps an arbitrary rustworkx graph to a grid. If no mapping exists
+    it will raise a ValueError.
+    Args:
+        graph: An arbitrary rustworkx graph to be mapped to a grid.
+        max_grid_size: Number of nodes on each side of the grid lattice.
+    Retruns:
+    A list with tuples (qubit_index,grid_coordinates) to be
+    used for mapping qiskit circuit to TensorNetworkQuantumSimulator.
+    """
+    # We initialize a square grid. Note that we give as weights
+    # julia indices that start at 1.
+    square = grid_graph(
+        max_grid_size,
+        max_grid_size,
+        weights=[
+            (x + 1, y + 1) for x in range(max_grid_size) for y in range(max_grid_size)
+        ],
+    )
+    possible_maps = rx.vf2_mapping(square, graph, subgraph=True, id_order=False)
+    try:
+        graph_map = next(possible_maps)
+    except StopIteration:
+        raise ValueError(
+            """The current graph can not be mapped to a square lattice.
+            Try increasing the size of the grid."""
+        )
+    qubit_map = tuple((graph[v], square[k]) for k, v in graph_map.items())
+    return sorted(qubit_map)

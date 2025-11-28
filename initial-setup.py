@@ -1,8 +1,9 @@
-from juliacall import Main as jl;
+from juliacall import Main as jl
 
 jl.seval(
     """using Pkg; 
          Pkg.add("ITensorNetworks");
-         Pkg.add(url="https://github.com/JoeyT1994/TensorNetworkQuantumSimulator.git", rev="d68550f197fd05d5d39bc8003dfebae63cc38f6f");
-         Pkg.develop(path="./")"""
+         Pkg.add(url="https://github.com/JoeyT1994/TensorNetworkQuantumSimulator.git", rev="788acb8293a95797f66a5d5ec226176389920824");
+         Pkg.develop(path="./")
+    """
 )

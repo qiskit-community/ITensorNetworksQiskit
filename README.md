@@ -47,12 +47,13 @@ The structure of this repository as follows:
 
 ## Authors and Citation
 
-`ITensorNetworksQiskit` was authored by 
+`ITensorNetworksQiskit` was originally authored by 
 [Kate Marshall](mailto:kate.marshall@ibm.com), [Lewis Anderson](mailto:lewis.anderson@ibm.com), 
 [Ben Jaderberg](mailto:benjamin.jaderberg@ibm.com) and
 [Joey Tindall](mailto:jtindall@flatironinstitute.org). 
 
-If you use this codebase for your research, please cite the latest version from Zenodo:
+If you use this codebase for your research, please cite the latest version and extended author list
+from Zenodo:
 https://zenodo.org/records/16926969.
 
 ## License

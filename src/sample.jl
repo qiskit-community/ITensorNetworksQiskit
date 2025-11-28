@@ -1,16 +1,31 @@
 using TensorNetworkQuantumSimulator
 const TNQS = TensorNetworkQuantumSimulator
 """
-You cannot call keyword arguments directly in Juliacall, which means we have to have this wrapper
-function
+Wrapper function for TNQS.sample. This is needed as keyword arguments cannot be used directly in
+    Juliacall. For more details on the bond dimenions see https://arxiv.org/abs/2507.11424.
 # Arguments
-- `ψt`: An ITensorNetwork`
+- `ψ_bpc`: A BeliefPropagationCache 
 - `nsamples`: Number of shots to sample
-- `projected_message_rank`: Passed to BoundaryMPSCache, see https://github.com/JoeyT1994/TensorNetworkQuantumSimulator/blob/4f3107286302b913f2ff57d7bd5f350c11518f7b/src/sample.jl#L22
-- `norm_message_rank`: Passed to BoundaryMPSCache, see https://github.com/JoeyT1994/TensorNetworkQuantumSimulator/blob/4f3107286302b913f2ff57d7bd5f350c11518f7b/src/sample.jl#L31
+- `projected_mps_bond_dimension`:  Bond dimension of the projected boundary MPS messages used during contraction of the projected state <x|ψ>.
+- `norm_mps_bond_dimension`: Bond dimension of the boundary MPS messages used to contract <ψ|ψ>.
+- `partition_by`: "column" or "row": how to partition the graph.
+
 """
-function sample_psi(ψt, nsamples, projected_message_rank=maxlinkdim(ψt)*5, norm_message_rank=maxlinkdim(ψt)^2, partition_by="Column")
-     nsamples = Int(nsamples)
-     return TNQS.sample(ψt, nsamples; projected_message_rank=projected_message_rank,
-                norm_message_rank=norm_message_rank, partition_by=partition_by)
+function sample_psi(
+    ψ_bpc,
+    nsamples,
+    projected_mps_bond_dimension = maxvirtualdim(ψ_bpc) * 5,
+    norm_mps_bond_dimension = maxvirtualdim(ψ_bpc)^2,
+    partition_by = "column",
+)
+    nsamples = Int(nsamples)
+    ψ = network(ψ_bpc)
+    return TNQS.sample(
+        ψ,
+        nsamples;
+        alg = "boundarymps",
+        projected_mps_bond_dimension = projected_mps_bond_dimension,
+        norm_mps_bond_dimension = norm_mps_bond_dimension,
+        partition_by = partition_by,
+    )
 end
