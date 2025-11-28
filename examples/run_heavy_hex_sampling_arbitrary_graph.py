@@ -13,14 +13,11 @@ from qiskit.transpiler import CouplingMap
 from qiskit.visualization import plot_circuit_layout
 
 from itensornetworks_qiskit.convert import circuit_description
-from itensornetworks_qiskit.graph import (
-    graph_from_edges,
-    graph_to_grid,
-)
+from itensornetworks_qiskit.graph import graph_from_edges, graph_to_grid
 
 jl.seval("using ITensorNetworksQiskit")
 
-cmap = CouplingMap().from_heavy_hex(3)
+cmap = CouplingMap().from_heavy_hex(7)
 n_qubits = cmap.size()
 print(f"Created heavy-hex graph with {cmap.size()} qubits")
 backend = GenericBackendV2(n_qubits, coupling_map=cmap)
@@ -30,7 +27,7 @@ graph = backend.coupling_map.get_edges()
 edges = tuple([tuple(s) for s in set([frozenset(item) for item in graph])])
 
 qc = QuantumCircuit(backend.num_qubits)
-num_layers = 1
+num_layers = 3
 for i in range(num_layers):
     for edge in graph:
         qc.h(edge[0])
@@ -41,18 +38,22 @@ for i in range(num_layers):
 
 qc = transpile(qc, backend, basis_gates=["cx", "h", "rx", "ry"])
 
-circuit, qmap = circuit_description(qc)
-graph = graph_from_edges(qmap)
+# Convert the circuit to the form expected by TNQS
+circuit, edges = circuit_description(qc)
+
+# Get the necessary mapping from qiskit qubit indices to 2D coordinate grid
+qmap = graph_to_grid(graph_from_edges(edges))
+
 plot_circuit_layout(
     qc, backend, qubit_coordinates=[qmap[i][1] for i in range(n_qubits)]
 ).show()
 
 # Set tensor network truncation parameters
-chi = 5
+chi = 8
 cutoff = 1e-12
 
 start_time = datetime.now()
-bpc, errors = jl.tn_from_circuit(circuit, qmap, qmap, chi, cutoff)
+psi_bpc, errors = jl.tn_from_circuit(circuit, qmap, edges, chi, cutoff)
 print("Estimated final state fidelity:", np.prod(1 - np.array(errors)))
 
 print("Sampling from circuit")
@@ -60,7 +61,7 @@ num_shots = 10
 projected_mps_bond_dimension = 5
 norm_mps_bond_dimension = 5
 samples = jl.sample_psi(
-    bpc, num_shots, projected_mps_bond_dimension, norm_mps_bond_dimension
+    psi_bpc, num_shots, projected_mps_bond_dimension, norm_mps_bond_dimension
 )
 
 t = datetime.now() - start_time

@@ -85,7 +85,7 @@ for _ in range(num_layers):
         [("Z", [q], 1.0) for q in range(5)], qc.num_qubits
     )
     obs_jl = jl.translate_observable(observable_description(obs), qmap)
-    itn_eval = np.real((jl.expect(psi_bpc, obs_jl)))
+    itn_eval = np.real(jl.expect(psi_bpc, obs_jl))
     itn_evals.append(itn_eval)
 
     # Obtain the 2-qubit RDM of the first edge

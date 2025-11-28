@@ -75,11 +75,11 @@ print(f"Overlap with zero state: {itn_overlap}")
 # Compute Z expectation values of an observable on qubits 1 and 2 of the qiskit circuit.
 obs = SparsePauliOp.from_sparse_list([("Z", [q], 1.0) for q in [1, 2]], qc.num_qubits)
 obs_jl = jl.translate_observable(observable_description(obs), qmap)
-z_eval = np.real(jl.sum(jl.expect(psi_bpc, obs_jl)))
-print(f"σz expectation value of sites 1 + 2: {z_eval}")
+z_eval = np.real(jl.expect(psi_bpc, obs_jl))
+print(f"σz expectation value of sites 1 and 2: {z_eval}")
 
 # And also compute a multi-qubit observable
 obs = SparsePauliOp.from_sparse_list([("XXX", [0, 1, 2], 1.0)], qc.num_qubits)
 obs_jl = jl.translate_observable(observable_description(obs), qmap)
-z_eval = np.real(jl.sum(jl.expect(psi_bpc, obs_jl)))
-print(f"σxxx expectation value of sites 1, 2 and 3: {z_eval}")
+z_eval = np.real(jl.expect(psi_bpc, obs_jl))
+print(f"σxxx expectation value across sites 1, 2 and 3: {z_eval}")
