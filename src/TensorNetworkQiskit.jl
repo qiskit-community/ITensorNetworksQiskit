@@ -1,4 +1,4 @@
-module ITensorNetworksQiskit
+module TensorNetworkQiskit
 
 include("imports.jl")
 

@@ -1,7 +1,7 @@
 import numpy as np
 from juliacall import Main as jl
 
-jl.seval("using ITensorNetworksQiskit")
+jl.seval("using TensorNetworkQiskit")
 jl.seval("using TensorNetworkQuantumSimulator")
 
 def rdm(psi, verts, alg="bp"):

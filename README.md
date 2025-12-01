@@ -1,11 +1,12 @@
-# ITensorNetworksQiskit
+# TensorNetworkQiskit
 
-**ITensorNetworksQiskit** is a lightweight library that enables easy use of [ITensorNetworks.jl](https://github.com/ITensor/ITensorNetworks.jl) 
-for tensor network simulations of quantum circuits built in Qiskit. There are a number 
+**TensorNetworkQiskit** is a lightweight library that enables easy use of
+[TensorNetworkQuantumSimulator.jl](https://github.com/JoeyT1994/TensorNetworkQuantumSimulator.jl)
+to simulate 2D quantum circuits built in Qiskit. There are a number 
 of end-to-end examples for using this code in the `examples` folder.
 
 > [!WARNING]
-> This library is an interface to [ITensorNetworks.jl](https://github.com/ITensor/ITensorNetworks.jl) which uses belief propagation
+> This library is an interface to [TensorNetworkQuantumSimulator.jl](https://github.com/JoeyT1994/TensorNetworkQuantumSimulator.jl) which uses belief propagation
 > for the underlying simulation. Beyond the error introduced by normal tensor network approximations
 > (e.g., finite bond dimension), the belief propagation ansatz is only fully accurate for a tree graph.
 > If the graph of the circuit is not a tree, then belief propagation is only an approximation
@@ -32,22 +33,9 @@ This project adheres to Qiskit's
 [code of conduct](https://github.com/Qiskit/qiskit/blob/master/CODE_OF_CONDUCT.md).
 By participating, you are expected to uphold this code.
 
-The structure of this repository as follows:
- 
- - `src`: is where the Julia code, including building tensor network representations of quantum circuits 
- using ITensorNetworks. 
- - `test`: is where test material will live. This is currently just a placeholder, as the existing test 
- material exists in `examples` folder with end-to-end example material. This `test` folder will be populated
- with unit test material in due course.
- - `itensornetworks_qiskit`: is where various Python-based utility functions live that assist in translating
- between Qiskit and ITensorNetworks or ITensor, enabling the examples found in `examples`
- - `examples`: is where you will find end-to-end examples of Qiskit code calling Julia ITensorNetworks and 
- ITensor using the `juliacall` Python package.
- - Files found in the root of the repository are all concerned with installation and setup
-
 ## Authors and Citation
 
-`ITensorNetworksQiskit` was originally authored by 
+`TensorNetworkQiskit` was originally authored by 
 [Kate Marshall](mailto:kate.marshall@ibm.com), [Lewis Anderson](mailto:lewis.anderson@ibm.com), 
 [Ben Jaderberg](mailto:benjamin.jaderberg@ibm.com) and
 [Joey Tindall](mailto:jtindall@flatironinstitute.org). 

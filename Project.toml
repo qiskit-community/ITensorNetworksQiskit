@@ -1,7 +1,7 @@
-name = "ITensorNetworksQiskit"
+name = "TensorNetworkQiskit"
 uuid = "9bbb9987-8b45-47af-9bc5-5060d48a7bd4"
-authors = ["Lewis Anderson", "Kate Marshall", "Ben Jaderberg"]
-version = "1.0.0-DEV"
+authors = ["Lewis Anderson", "Kate Marshall", "Ben Jaderberg", "Joseph Tindall"]
+version = "1.0.2"
 
 [deps]
 DataGraphs = "b5a273c3-7e6c-41f6-98bd-8d7f1525a36a"
