@@ -12,10 +12,10 @@ from qiskit.providers.fake_provider import GenericBackendV2
 from qiskit.transpiler import CouplingMap
 from qiskit.visualization import plot_circuit_layout
 
-from itensornetworks_qiskit.convert import circuit_description
-from itensornetworks_qiskit.graph import graph_from_edges, graph_to_grid
+from tensor_network_qiskit.convert import circuit_description
+from tensor_network_qiskit.graph import graph_from_edges, graph_to_grid
 
-jl.seval("using ITensorNetworksQiskit")
+jl.seval("using TensorNetworkQiskit")
 
 cmap = CouplingMap().from_heavy_hex(7)
 n_qubits = cmap.size()
