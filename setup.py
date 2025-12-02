@@ -5,7 +5,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="TensorNetworkQiskit",
+    name="qiskit-tnqs",
     version="1.0.2",
     description="A library for simulating Qiskit circuits using TensorNetworkQuantumSimulator.jl whilst staying in Python.",
     author="Kate Marshall, Lewis Anderson, Ben Jaderberg, Joey Tindall",

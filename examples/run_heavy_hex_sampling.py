@@ -11,11 +11,11 @@ from qiskit import QuantumCircuit, transpile
 from qiskit.visualization import plot_circuit_layout
 from qiskit_ibm_runtime.fake_provider import FakeSherbrooke
 
-from tensor_network_qiskit.convert import circuit_description
-from tensor_network_qiskit.graph import graph_from_edges, graph_to_grid
+from qiskit_tnqs.convert import circuit_description
+from qiskit_tnqs.graph import graph_from_edges, graph_to_grid
 
 # Import any julia dependencies we are calling directly
-jl.seval("using TensorNetworkQiskit")
+jl.seval("using QiskitTNQS")
 
 backend = FakeSherbrooke()
 n_qubits = backend.num_qubits

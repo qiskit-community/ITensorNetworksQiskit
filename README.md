@@ -1,9 +1,8 @@
-# TensorNetworkQiskit
+# qiskit-tnqs
 
-**TensorNetworkQiskit** is a lightweight library that enables easy use of
-[TensorNetworkQuantumSimulator.jl](https://github.com/JoeyT1994/TensorNetworkQuantumSimulator.jl)
-to simulate 2D quantum circuits built in Qiskit. There are a number 
-of end-to-end examples for using this code in the `examples` folder.
+**qiskit-tnqs** is a lightweight library that enables simulation of Qiskit circuits using
+[TensorNetworkQuantumSimulator.jl](https://github.com/JoeyT1994/TensorNetworkQuantumSimulator.jl). 
+There are a number of end-to-end examples for using this code in the `examples` folder.
 
 > [!WARNING]
 > This library is an interface to [TensorNetworkQuantumSimulator.jl](https://github.com/JoeyT1994/TensorNetworkQuantumSimulator.jl) which uses belief propagation
@@ -35,7 +34,7 @@ By participating, you are expected to uphold this code.
 
 ## Authors and Citation
 
-`TensorNetworkQiskit` was originally authored by 
+`qiskit-tnqs` was originally authored by 
 [Kate Marshall](mailto:kate.marshall@ibm.com), [Lewis Anderson](mailto:lewis.anderson@ibm.com), 
 [Ben Jaderberg](mailto:benjamin.jaderberg@ibm.com) and
 [Joey Tindall](mailto:jtindall@flatironinstitute.org). 
