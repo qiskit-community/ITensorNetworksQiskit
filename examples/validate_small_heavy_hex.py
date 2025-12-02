@@ -20,16 +20,16 @@ from qiskit.quantum_info import (
 from qiskit.transpiler import CouplingMap
 from qiskit.visualization import plot_circuit_layout
 
-from tensor_network_qiskit.convert import (
+from qiskit_tnqs.convert import (
     SUPPORTED_GATES,
     circuit_description,
     observable_description,
 )
-from tensor_network_qiskit.graph import graph_to_grid, graph_from_edges
-from tensor_network_qiskit.observables import rdm
+from qiskit_tnqs.graph import graph_to_grid, graph_from_edges
+from qiskit_tnqs.observables import rdm
 
-jl.seval("using TensorNetworkQiskit")
-jl.seval("using TensorNetworkQiskit: rdm")
+jl.seval("using QiskitTNQS")
+jl.seval("using QiskitTNQS: rdm")
 jl.seval("using TensorNetworkQuantumSimulator")
 
 cmap = CouplingMap().from_heavy_hex(3)

@@ -1,4 +1,4 @@
-name = "TensorNetworkQiskit"
+name = "QiskitTNQS"
 uuid = "9bbb9987-8b45-47af-9bc5-5060d48a7bd4"
 authors = ["Lewis Anderson", "Kate Marshall", "Ben Jaderberg", "Joseph Tindall"]
 version = "1.0.2"
