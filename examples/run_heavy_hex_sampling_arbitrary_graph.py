@@ -60,8 +60,9 @@ print("Sampling from circuit")
 num_shots = 10
 projected_mps_bond_dimension = 5
 norm_mps_bond_dimension = 5
+
 samples = jl.sample_psi(
-    psi_bpc, num_shots, projected_mps_bond_dimension, norm_mps_bond_dimension
+    psi_bpc, num_shots, projected_mps_bond_dimension, norm_mps_bond_dimension, "boundarymps"
 )
 
 t = datetime.now() - start_time

@@ -16,6 +16,7 @@ function sample_psi(
     nsamples,
     projected_mps_bond_dimension = maxvirtualdim(ψ_bpc) * 5,
     norm_mps_bond_dimension = maxvirtualdim(ψ_bpc)^2,
+    alg = "boundarymps",
     partition_by = "column",
 )
     nsamples = Int(nsamples)
@@ -23,7 +24,7 @@ function sample_psi(
     return TNQS.sample(
         ψ,
         nsamples;
-        alg = "boundarymps",
+        alg = alg,
         projected_mps_bond_dimension = projected_mps_bond_dimension,
         norm_mps_bond_dimension = norm_mps_bond_dimension,
         partition_by = partition_by,
