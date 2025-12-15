@@ -1,3 +1,5 @@
+import juliapkg
+juliapkg.require_julia("=1.11.7")
 from juliacall import Main as jl
 
 jl.seval(
