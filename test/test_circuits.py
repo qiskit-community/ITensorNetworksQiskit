@@ -29,8 +29,9 @@ class TestCircuits(unittest.TestCase):
         for gate in sorted(SUPPORTED_GATES):
             with self.subTest(gate=gate):
                 qc = QuantumCircuit(2)
-                qc.h(0)
+                # Add a dummy CX so that the "edge" is picked up
                 qc.cx(0, 1)
+                qc.h(0)
 
                 if gate == "rx":
                     qc.rx(0.7, 0)
