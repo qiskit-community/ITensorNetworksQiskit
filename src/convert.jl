@@ -140,7 +140,7 @@ function convertZ(
 end
 
 name_mapping = Dict(
-    "rx" => convertRy,
+    "rx" => convertRx,
     "ry" => convertRy,
     "rz" => convertRz,
     "rxx" => convertRxx,
