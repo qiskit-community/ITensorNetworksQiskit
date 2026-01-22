@@ -68,39 +68,31 @@ function convertRz(
 )
     return convertRp("Rz", indices, parameter, qubit_map)
 end
-function convertRxx(
-    indices::Vector{Int},
-    parameter::Vector{Any},
-    qubit_map::Dict{Int,Tuple{Int,Int}},
-)
+
+function convertRxx(indices::Vector{Int}, parameter::Vector{Any}, qubit_map::Dict{Int,Tuple{Int,Int}})
     return (
         "Rxx",
         NamedEdge(Tuple(qubit_map[indices[1]]) => Tuple(qubit_map[indices[2]])),
-        0.1,
+        Float64(parameter[1]),
     )
 end
-function convertRyy(
-    indices::Vector{Int},
-    parameter::Vector{Any},
-    qubit_map::Dict{Int,Tuple{Int,Int}},
-)
+
+function convertRyy(indices::Vector{Int}, parameter::Vector{Any}, qubit_map::Dict{Int,Tuple{Int,Int}})
     return (
         "Ryy",
         NamedEdge(Tuple(qubit_map[indices[1]]) => Tuple(qubit_map[indices[2]])),
-        0.1,
+        Float64(parameter[1]),
     )
 end
-function convertRzz(
-    indices::Vector{Int},
-    parameter::Vector{Any},
-    qubit_map::Dict{Int,Tuple{Int,Int}},
-)
+
+function convertRzz(indices::Vector{Int}, parameter::Vector{Any}, qubit_map::Dict{Int,Tuple{Int,Int}})
     return (
         "Rzz",
         NamedEdge(Tuple(qubit_map[indices[1]]) => Tuple(qubit_map[indices[2]])),
-        0.1,
+        Float64(parameter[1]),
     )
 end
+
 
 #Non parameterized gates
 function convertCNOT(
