@@ -76,7 +76,7 @@ function convertRxx(
     return (
         "Rxx",
         NamedEdge(Tuple(qubit_map[indices[1]]) => Tuple(qubit_map[indices[2]])),
-        0.1,
+        Float64(parameter[1]),
     )
 end
 function convertRyy(
@@ -87,7 +87,7 @@ function convertRyy(
     return (
         "Ryy",
         NamedEdge(Tuple(qubit_map[indices[1]]) => Tuple(qubit_map[indices[2]])),
-        0.1,
+        Float64(parameter[1]),
     )
 end
 function convertRzz(
@@ -98,7 +98,7 @@ function convertRzz(
     return (
         "Rzz",
         NamedEdge(Tuple(qubit_map[indices[1]]) => Tuple(qubit_map[indices[2]])),
-        0.1,
+        Float64(parameter[1]),
     )
 end
 
